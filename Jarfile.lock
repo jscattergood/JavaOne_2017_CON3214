@@ -1,0 +1,27 @@
+---
+:runtime:
+- io.ratpack:ratpack-core:jar:1.5.0
+- io.netty:netty-transport-native-epoll:jar:linux-x86_64:4.1.9.Final
+- org.javassist:javassist:jar:3.19.0-GA
+- com.google.guava:guava:jar:21.0
+- com.fasterxml.jackson.core:jackson-annotations:jar:2.8.0
+- org.reactivestreams:reactive-streams:jar:1.0.0.final
+- com.github.ben-manes.caffeine:caffeine:jar:2.4.0
+- com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:jar:2.8.7
+- io.netty:netty-codec:jar:4.1.9.Final
+- com.fasterxml.jackson.core:jackson-databind:jar:2.8.7
+- com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.8.7
+- io.ratpack:ratpack-exec:jar:1.5.0
+- io.ratpack:ratpack-base:jar:1.5.0
+- org.yaml:snakeyaml:jar:1.17
+- io.netty:netty-common:jar:4.1.9.Final
+- com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.8.7
+- com.fasterxml.jackson.core:jackson-core:jar:2.8.7
+- org.slf4j:slf4j-simple:jar:1.7.25
+- io.netty:netty-resolver:jar:4.1.9.Final
+- org.slf4j:slf4j-api:jar:1.7.25
+- io.netty:netty-transport:jar:4.1.9.Final
+- io.netty:netty-handler:jar:4.1.9.Final
+- io.netty:netty-codec-http:jar:4.1.9.Final
+- io.netty:netty-buffer:jar:4.1.9.Final
+- com.fasterxml.jackson.datatype:jackson-datatype-guava:jar:2.8.7
