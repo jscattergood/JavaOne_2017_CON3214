@@ -3,9 +3,6 @@ Bundler.require
 require 'java'
 
 java_import 'ratpack.server.RatpackServer'
-java_import 'ratpack.stream.Streams'
-java_import 'ratpack.http.ResponseChunks'
-java_import 'java.time.Duration'
 
 RatpackServer.start do |server|
   server.server_config do |cfg|

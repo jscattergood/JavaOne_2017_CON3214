@@ -5,19 +5,17 @@ require 'jruby/core_ext'
 require 'json'
 
 java_import 'ratpack.server.RatpackServer'
-java_import 'ratpack.stream.Streams'
-java_import 'ratpack.http.ResponseChunks'
-java_import 'java.time.Duration'
-java_import 'java.util.HashMap'
+java_import 'java.nio.file.FileSystems'
 
 RatpackServer.start do |server|
   server.server_config do |cfg|
     cfg.env('WA_')
+    cfg.base_dir(FileSystems.default.get_path(File.absolute_path('.')))
   end
 
   server.handlers do |chain|
-    chain.get do |ctx|
-      ctx.render('OK')
+    chain.files do |f|
+      f.dir('public').index_files('index.html')
     end
 
     chain.post('weather') do |ctx|

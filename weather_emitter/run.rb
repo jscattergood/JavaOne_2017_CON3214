@@ -6,10 +6,8 @@ require './weather_service_client'
 require './yahoo_weather_client'
 
 java_import 'ratpack.server.RatpackServer'
-java_import 'ratpack.service.Service'
 java_import 'ratpack.stream.Streams'
 java_import 'ratpack.http.client.HttpClient'
-java_import 'ratpack.http.ResponseChunks'
 java_import 'ratpack.exec.Promise'
 
 RatpackServer.start do |server|
