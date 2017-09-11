@@ -22,6 +22,9 @@ RatpackServer.start do |server|
       ctx.request.body
         .map { |b| JSON.parse(b.text) }
         .map { |event| puts event}
+        .map { |event|
+          sleep(1)
+        }
         .then { ctx.render('OK') }
     end
 

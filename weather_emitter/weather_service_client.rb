@@ -3,6 +3,7 @@ Bundler.require
 require 'java'
 require 'json'
 
+java_import 'java.time.Duration'
 
 class WeatherServiceClient
   def initialize(url, client)
@@ -13,6 +14,8 @@ class WeatherServiceClient
   def send_weather_event(event)
     uri = java.net.URI.new("#{ @url }/weather")
     @client.post(uri) do |req|
+      req.connect_timeout(Duration.of_seconds(5))
+      req.read_timeout(Duration.of_seconds(5))
       req.body { |b| b.text(event.to_json) }
     end
   end

@@ -21,7 +21,10 @@ RatpackServer.start do |server|
       alarm_service_client = AlarmServiceClient.new(ENV['WA_ALARM_SERVICE_URL'], http_client)
 
       ctx.request.body
-        .map { |b| JSON.parse(b.text) }
+        .map { |b|
+          puts b.text
+          JSON.parse(b.text)
+        }
         .flat_map { |event| alarm_service_client.send_weather_event(event) }
         .then { ctx.render('OK') }
     end
