@@ -1,0 +1,38 @@
+version: '3.3'
+services:
+  weather:
+    build: .
+    container_name: weather
+    command: bundle exec jruby ./weather_service_backpressure/run.rb
+    volumes:
+          - .:/usr/src/app
+    environment:
+      - WA_SERVER__PORT=80
+      - WA_ALARM_SERVICE_URL=http://alarm
+    ports:
+      - 5000:80
+    links:
+      - alarm
+  alarm:
+    build: .
+    container_name: alarm
+    command: bundle exec jruby ./alarm_service/run.rb
+    volumes:
+          - .:/usr/src/app
+    environment:
+      - WA_SERVER__PORT=80
+      - WA_NOTIFICATION_SERVICE_URL=http://notification
+    expose:
+      - 80
+    links:
+      - notification
+  notification:
+    build: .
+    command: bundle exec jruby ./notification_service/run.rb
+    volumes:
+          - .:/usr/src/app
+    container_name: notification
+    environment:
+      - WA_SERVER__PORT=80
+    expose:
+      - 80

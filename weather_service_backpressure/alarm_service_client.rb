@@ -1,5 +1,3 @@
-require 'bundler/setup'
-Bundler.require
 require 'java'
 require 'json'
 

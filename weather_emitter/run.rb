@@ -1,9 +1,8 @@
-require 'bundler/setup'
-Bundler.require
+require 'jbundler'
 require 'java'
 require 'json'
-require './weather_service_client'
-require './yahoo_weather_client'
+require './weather_emitter/weather_service_client'
+require './weather_emitter/yahoo_weather_client'
 
 java_import 'ratpack.server.RatpackServer'
 java_import 'java.time.Duration'

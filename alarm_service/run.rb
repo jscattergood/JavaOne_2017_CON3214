@@ -1,5 +1,4 @@
-require 'bundler/setup'
-Bundler.require
+require 'jbundler'
 require 'java'
 require 'jruby/core_ext'
 require 'json'

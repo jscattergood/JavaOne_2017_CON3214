@@ -1,5 +1,4 @@
-require 'bundler/setup'
-Bundler.require
+require 'jbundler'
 require 'java'
 
 java_import 'ratpack.server.RatpackServer'
