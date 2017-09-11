@@ -3,7 +3,7 @@ services:
   weather:
     build: .
     container_name: weather
-    command: bundle exec jruby ./weather_service_backpressure/run.rb
+    command: bundle exec jruby ./weather_service/backpressure_run.rb
     volumes:
           - .:/usr/src/app
     environment:

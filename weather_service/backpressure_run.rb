@@ -1,6 +1,6 @@
 require 'jbundler'
 require 'java'
-require './weather_service_backpressure/alarm_service_client'
+require './weather_service/alarm_service_client'
 
 java_import 'ratpack.server.RatpackServer'
 java_import 'ratpack.http.client.HttpClient'
