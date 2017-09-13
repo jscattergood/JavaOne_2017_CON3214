@@ -5,7 +5,6 @@ require './weather_emitter/weather_service_client'
 require './weather_emitter/yahoo_weather_client'
 
 java_import 'ratpack.server.RatpackServer'
-java_import 'java.time.Duration'
 java_import 'ratpack.stream.Streams'
 java_import 'ratpack.http.ResponseChunks'
 java_import 'ratpack.http.client.HttpClient'
@@ -24,7 +23,7 @@ RatpackServer.start do |server|
       locations = %w(94105 94103 94102 94025 94040 95054)
       http_client = ctx.get(HttpClient.java_class)
       source_weather_events(locations, http_client)
-      .toList
+      .to_list
       .then do |events|
         ctx.render(
           ResponseChunks.string_chunks(

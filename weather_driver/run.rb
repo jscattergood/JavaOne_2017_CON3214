@@ -8,6 +8,7 @@ threads = []
   threads << Thread.start do
     uri = URI.parse("#{ENV['WA_WEATHER_SERVICE_URL']}/weather")
     http = Net::HTTP.new(uri.host, uri.port)
+    backoff = 1
     done = false
     until done
       request = Net::HTTP::Post.new(uri.path, { 'Content-Type' => 'application/json' })
@@ -18,6 +19,13 @@ threads = []
 
       response = http.request(request)
       puts "#{Time.now}: #{response.code}"
+      if response.code == '429'
+        puts "backing off for #{backoff} secs"
+        sleep(backoff)
+        backoff *= 2
+      else
+        backoff = 1
+      end
     end
   end
 end
