@@ -12,6 +12,7 @@ GEM
     equalizer (0.0.11)
     ice_nine (0.11.2)
     jar-dependencies (0.3.11)
+    java_override (0.1.4-java)
     jbundler (0.9.3)
       bundler (~> 1.5)
       jar-dependencies (~> 0.3)
@@ -33,6 +34,7 @@ PLATFORMS
   java
 
 DEPENDENCIES
+  java_override
   jbundler
 
 BUNDLED WITH

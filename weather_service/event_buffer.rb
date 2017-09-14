@@ -1,4 +1,4 @@
-require 'java'
+require 'java/override'
 
 java_import 'java.lang.Runnable'
 java_import 'java.util.concurrent.TimeUnit'
@@ -10,6 +10,7 @@ java_import 'ratpack.exec.Execution'
 java_import 'ratpack.exec.Promise'
 
 class EventBuffer
+  include Java::Override
   include Service
   include Runnable
 
@@ -23,7 +24,7 @@ class EventBuffer
     end
   end
 
-  def onStart(start_event)
+  def on_start(start_event)
     registry = start_event.registry
     http_client = registry.get(HttpClient.java_class)
     @alarm_service_client = AlarmServiceClient.new(ENV['WA_ALARM_SERVICE_URL'], http_client)
@@ -44,10 +45,10 @@ class EventBuffer
   def get_events
     #TODO Make this a custom publisher
     Promise
-      .async { |d|
+      .async { |downstream|
         events = []
         @buffer.drain_to(events, 10)
-        d.success(events)
+        downstream.success(events)
       }
   end
 
