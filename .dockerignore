@@ -1,0 +1,11 @@
+#IntelliJ
+*.iml
+.idea/
+
+#Bundler
+.bundle/
+bin/
+
+#Jbundler
+pkg/
+.jbundler/
