@@ -33,32 +33,35 @@ class EventBuffer
   end
 
   def run
-    Execution.fork
-      .start do |_|
-      #TODO Make this a custom publisher
-      Promise
-        .async { |d|
-          events = []
-          @buffer.drain_to(events, 10)
-          d.success(events)
-        }
+    Execution.fork.start do |_|
+      get_events
         .map { |events| reduce_events(events) }
-        .flat_map { |events|
-          Streams
-            .publish(events)
-            .flat_map { |event|
-              @alarm_service_client.send_weather_event(event)
-                .on_error { |err|
-                  @buffer.offer(event, 1, TimeUnit::SECONDS)
-                  STDERR.puts "{event: #{event}, error: #{err}}"
-                }
-            }
-            .to_list
-        }
-        .then { |responses|
-          puts "#{Time.now}: #{responses.length} responses"
-        }
+        .flat_map { |events| send_events(events) }
+        .then { |responses| puts "#{Time.now}: #{responses.length} responses" }
     end
+  end
+
+  def get_events
+    #TODO Make this a custom publisher
+    Promise
+      .async { |d|
+        events = []
+        @buffer.drain_to(events, 10)
+        d.success(events)
+      }
+  end
+
+  def send_events(events)
+    Streams
+      .publish(events)
+      .flat_map { |event|
+        @alarm_service_client.send_weather_event(event)
+          .on_error { |err|
+            @buffer.offer(event, 1, TimeUnit::SECONDS)
+            STDERR.puts "{event: #{event}, error: #{err}}"
+          }
+      }
+      .to_list
   end
 
   def reduce_events(events)

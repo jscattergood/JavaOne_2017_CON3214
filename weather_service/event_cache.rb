@@ -36,38 +36,41 @@ class EventCache
   end
 
   def run
-    Execution.fork
-      .start do |_|
-      #TODO Make this a custom publisher
-      Promise
-        .async { |d|
-          keys = []
-          count = 0
-          @updates.each_key do |key|
-            break if count >= 10
-            count += 1
-            keys << key
-            @updates.remove(key)
-          end
-          d.success(keys)
-        }
+    Execution.fork.start do |_|
+      get_events
         .map { |keys| hydrate_events(keys) }
-        .flat_map { |events|
-          Streams
-            .publish(events)
-            .flat_map { |event|
-              @alarm_service_client.send_weather_event(event)
-                .on_error { |err|
-                  @updates.put(event[:location], true)
-                  STDERR.puts "{event: #{event}, error: #{err}}"
-                }
-            }
-            .to_list
-        }
-        .then { |responses|
-          puts "#{Time.now}: #{responses.length} responses"
-        }
+        .flat_map { |events| send_events(events) }
+        .then { |responses| puts "#{Time.now}: #{responses.length} responses" }
     end
+  end
+
+  def get_events
+    #TODO Make this a custom publisher
+    Promise
+      .async { |d|
+        keys = []
+        count = 0
+        @updates.each_key do |key|
+          break if count >= 10
+          count += 1
+          keys << key
+          @updates.remove(key)
+        end
+        d.success(keys)
+      }
+  end
+
+  def send_events(events)
+    Streams
+      .publish(events)
+      .flat_map { |event|
+        @alarm_service_client.send_weather_event(event)
+          .on_error { |err|
+            @updates.put(event[:location], true)
+            STDERR.puts "{event: #{event}, error: #{err}}"
+          }
+      }
+      .to_list
   end
 
   def hydrate_events(keys)
