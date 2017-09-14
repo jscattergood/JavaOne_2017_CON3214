@@ -5,15 +5,23 @@ require './weather_service/event_buffer'
 
 java_import 'ratpack.server.RatpackServer'
 java_import 'ratpack.http.client.HttpClient'
+java_import 'ratpack.dropwizard.metrics.DropwizardMetricsModule'
+java_import 'ratpack.guice.Guice'
 
 RatpackServer.start do |server|
   server.server_config do |cfg|
     cfg.env('WA_')
   end
 
-  server.registry_of do |r|
-    r.add(EventBuffer.new)
-  end
+  server.registry(
+    Guice::registry do |r|
+      r.module(DropwizardMetricsModule.new) do |m|
+        m.jmx
+      end
+
+      r.add(EventBuffer.new)
+    end
+  )
 
   server.handlers do |chain|
     chain.get do |ctx|
@@ -24,9 +32,7 @@ RatpackServer.start do |server|
       buffer = ctx.get(EventBuffer.java_class)
 
       ctx.request.body
-        .map { |b|
-          JSON.parse(b.text)
-        }
+        .map { |b| JSON.parse(b.text) }
         .flat_map { |event| buffer.add(event) }
         .then { |buffered|
           if buffered

@@ -4,6 +4,8 @@ require 'jruby/core_ext'
 require 'json'
 
 java_import 'ratpack.server.RatpackServer'
+java_import 'ratpack.dropwizard.metrics.DropwizardMetricsModule'
+java_import 'ratpack.guice.Guice'
 java_import 'java.nio.file.FileSystems'
 
 RatpackServer.start do |server|
@@ -11,6 +13,14 @@ RatpackServer.start do |server|
     cfg.env('WA_')
     cfg.base_dir(FileSystems.default.get_path(File.absolute_path('.')))
   end
+
+  server.registry(
+    Guice::registry do |r|
+      r.module(DropwizardMetricsModule.new) do |m|
+        m.jmx
+      end
+    end
+  )
 
   server.handlers do |chain|
     chain.files do |f|
