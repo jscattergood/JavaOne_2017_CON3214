@@ -1,38 +1,111 @@
 version: '3.3'
 services:
+  orbiter:
+    image: gianarb/orbiter
+    command: daemon
+    ports:
+      - 8081:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
   weather:
-    build: .
-    container_name: weather
-    command: bundle exec jruby ./weather_service/backpressure_run.rb
+    image: weatheralarm
+    command: bundle exec jruby ./weather_service/cache_run.rb
     volumes:
           - .:/usr/src/app
     environment:
-      - WA_SERVER__PORT=80
       - WA_ALARM_SERVICE_URL=http://alarm
     ports:
       - 5000:80
-    links:
-      - alarm
+    networks:
+      - weatheralarm
+    labels: [orbiter=true]
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels: [orbiter=true]
+      update_config:
+        parallelism: 2
+        delay: 3s
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+        restart_policy:
+          condition: on-failure
+          delay: 3s
+          max_attempts: 3
+          window: 5s
   alarm:
-    build: .
-    container_name: alarm
+    image: weatheralarm
     command: bundle exec jruby ./alarm_service/run.rb
     volumes:
           - .:/usr/src/app
     environment:
-      - WA_SERVER__PORT=80
       - WA_NOTIFICATION_SERVICE_URL=http://notification
-    expose:
-      - 80
-    links:
-      - notification
+    networks:
+      - weatheralarm
+    labels: [orbiter=true]
+    deploy:
+      mode: replicated
+      replicas: 3
+      labels: [orbiter=true]
+      update_config:
+        parallelism: 2
+        delay: 3s
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+        restart_policy:
+          condition: on-failure
+          delay: 3s
+          max_attempts: 3
+          window: 5s
   notification:
-    build: .
+    image: weatheralarm
     command: bundle exec jruby ./notification_service/run.rb
     volumes:
           - .:/usr/src/app
-    container_name: notification
-    environment:
-      - WA_SERVER__PORT=80
-    expose:
-      - 80
+    networks:
+      - weatheralarm
+    labels: [orbiter=true]
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels: [orbiter=true]
+      update_config:
+        parallelism: 2
+        delay: 3s
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+        restart_policy:
+          condition: on-failure
+          delay: 3s
+          max_attempts: 3
+          window: 5s
+networks:
+  weatheralarm:
