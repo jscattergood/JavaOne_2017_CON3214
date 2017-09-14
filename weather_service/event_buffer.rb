@@ -55,7 +55,8 @@ class EventBuffer
     Streams
       .publish(events)
       .flat_map { |event|
-        @alarm_service_client.send_weather_event(event)
+        @alarm_service_client
+          .send_weather_event(event)
           .on_error { |err|
             @buffer.offer(event, 1, TimeUnit::SECONDS)
             STDERR.puts "{event: #{event}, error: #{err}}"

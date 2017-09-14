@@ -64,7 +64,8 @@ class EventCache
     Streams
       .publish(events)
       .flat_map { |event|
-        @alarm_service_client.send_weather_event(event)
+        @alarm_service_client
+          .send_weather_event(event)
           .on_error { |err|
             @updates.put(event[:location], true)
             STDERR.puts "{event: #{event}, error: #{err}}"
