@@ -32,7 +32,7 @@ RatpackServer.start do |server|
         .map { |b| JSON.parse(b.text) }
         .map { |event| puts event}
         .map { |event|
-          sleep(1)
+          sleep(2)
         }
         .then { ctx.render('OK') }
     end

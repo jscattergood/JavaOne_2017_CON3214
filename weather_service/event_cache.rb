@@ -3,6 +3,7 @@ require 'java/override'
 java_import 'java.lang.Runnable'
 java_import 'java.util.concurrent.TimeUnit'
 java_import 'java.util.concurrent.ConcurrentHashMap'
+java_import 'java.time.Duration'
 java_import 'ratpack.stream.Streams'
 java_import 'ratpack.service.Service'
 java_import 'ratpack.exec.ExecController'
@@ -17,6 +18,7 @@ class EventCache
   def initialize
     @cache = ConcurrentHashMap.new(100000)
     @updates = ConcurrentHashMap.new
+    @backoff_duration = 0
   end
 
   def add(event)
@@ -38,10 +40,37 @@ class EventCache
 
   def run
     Execution.fork.start do |_|
+      start = Time.now
       get_events
         .map { |keys| hydrate_events(keys) }
+        .map { |keys|
+          puts "Wait time: #{Time.now - start}"
+          keys
+        }
         .flat_map { |events| send_events(events) }
-        .then { |responses| puts "#{Time.now}: #{responses.length} responses" }
+        .defer(Duration.of_seconds(@backoff_duration))
+        .then do |responses|
+          responses.each { |response| handle_response(response) }
+        end
+    end
+  end
+
+  def handle_response(response)
+    puts "#{Time.now}: #{response.status.code}"
+    backpressure(response.status.code == 429 || response.status.code >= 500)
+  end
+
+  def backpressure(backoff)
+    if backoff
+      @backoff_duration = [600, 1 + @backoff_duration * 2].min
+      puts "increasing back off to #{@backoff_duration} secs"
+    else
+      @backoff_duration = [@backoff_duration / 2, 1].max
+      if @backoff_duration > 1
+        puts "decreasing back off to #{@backoff_duration} secs"
+      else
+        @backoff_duration = 0
+      end
     end
   end
 
@@ -69,6 +98,7 @@ class EventCache
           .send_weather_event(event)
           .on_error do |err|
             @updates.put(event[:location], true)
+            backpressure(true)
             STDERR.puts "{event: #{event}, error: #{err}}"
           end
       end

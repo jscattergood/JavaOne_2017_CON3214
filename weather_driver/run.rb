@@ -19,7 +19,7 @@ threads = []
 
       response = http.request(request)
       puts "#{Time.now}: #{response.code}"
-      if response.code == '429'
+      if response.code == '429' || response.code >= '500'
         puts "backing off for #{backoff} secs"
         sleep(backoff)
         backoff *= 2
