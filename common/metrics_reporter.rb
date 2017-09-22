@@ -13,7 +13,7 @@ class MetricsReporter
     @metrics_service_client = MetricsServiceClient.new(ENV['WA_METRICS_SERVICE_URL'], http_client)
 
     @byte_buf_allocator = registry.get(ByteBufAllocator.java_class)
-    @metrics_registry = registry.get(MetricRegistry.java_class)
+    @metric_registry = registry.get(MetricRegistry.java_class)
 
     exec = registry.get(ExecController.java_class)
     exec.executor.schedule_at_fixed_rate(self, 0, 15, TimeUnit::SECONDS)
@@ -21,19 +21,19 @@ class MetricsReporter
 
   def run
     Execution.fork.start do |_|
-      Promise.value(@metrics_registry)
+      Promise
+        .value(@metric_registry)
         .map(MetricRegistryJsonMapper.new(@byte_buf_allocator, MetricFilter::ALL))
         .map { |byte_buf| byte_buf.to_string(Charset.default_charset) }
-        .map { |string|
-          JSON.parse(string)
-        }
-        .flat_map { |metric|
-          @metrics_service_client.send_event(metric)
-            .on_error do |err|
-            STDERR.puts "{metric: #{metric}, error: #{err}}"
-          end
-        }
+        .map { |string| JSON.parse(string) }
+        .flat_map { |metric| send_event(metric) }
         .then { |__| }
     end
+  end
+
+  def send_event(metric)
+    @metrics_service_client
+      .send_event(metric)
+      .on_error { |err| STDERR.puts "{metric: #{metric}, error: #{err}}" }
   end
 end

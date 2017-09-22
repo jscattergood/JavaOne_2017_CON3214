@@ -21,3 +21,9 @@ java_import 'ratpack.http.client.HttpClient'
 java_import 'ratpack.service.Service'
 java_import 'ratpack.server.RatpackServer'
 java_import 'ratpack.stream.Streams'
+
+module Common
+  def to_uri(url)
+    java.net.URI.new(url)
+  end
+end

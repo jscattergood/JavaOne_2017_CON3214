@@ -27,6 +27,8 @@ services:
       - .:/usr/src/app
     environment:
       - WA_METRICS_SERVICE_URL=http://metrics
+      - WA_AUTOSCALER_SERVICE_URL=http://orbiter:8000
+      - WA_STACK_NAME=wa
       - WA_SERVICE_NAME=metrics
     networks:
       - weatheralarm

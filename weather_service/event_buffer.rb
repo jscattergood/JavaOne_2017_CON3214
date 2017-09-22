@@ -20,6 +20,7 @@ class EventBuffer
     registry = start_event.registry
     http_client = registry.get(HttpClient.java_class)
     @alarm_service_client = AlarmServiceClient.new(ENV['WA_ALARM_SERVICE_URL'], http_client)
+    @metric_registry = registry.get(MetricRegistry.java_class)
 
     exec = registry.get(ExecController.java_class)
     exec.executor.schedule_at_fixed_rate(self, 0, 1, TimeUnit::SECONDS)
@@ -44,6 +45,7 @@ class EventBuffer
 
   def backpressure(backoff)
     if backoff
+      @metric_registry.meter('service.backpressure.alarm').mark
       @backoff_duration = [600, 1 + @backoff_duration * 2].min
       puts "increasing back off to #{@backoff_duration} secs"
     else

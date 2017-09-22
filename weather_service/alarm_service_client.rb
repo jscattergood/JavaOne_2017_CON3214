@@ -1,13 +1,15 @@
 require './common/common'
 
 class AlarmServiceClient
+  include Common
+
   def initialize(url, client)
     @url = url
     @client = client
   end
 
   def send_event(event)
-    uri = java.net.URI.new("#{ @url }/weather")
+    uri = to_uri("#{ @url }/weather")
     @client.post(uri) do |req|
       req.connect_timeout(Duration.of_seconds(5))
       req.read_timeout(Duration.of_seconds(5))
