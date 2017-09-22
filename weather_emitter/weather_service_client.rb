@@ -9,7 +9,7 @@ class WeatherServiceClient
     @client = client
   end
 
-  def send_weather_event(event)
+  def send_event(event)
     uri = java.net.URI.new("#{ @url }/weather")
     @client.post(uri) do |req|
       req.connect_timeout(Duration.of_seconds(5))

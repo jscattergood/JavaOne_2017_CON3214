@@ -28,7 +28,7 @@ RatpackServer.start do |server|
         ctx.render(
           ResponseChunks.string_chunks(
             stream_weather_events(events)
-              .flat_map { |event| weather_service_client.send_weather_event(event) }
+              .flat_map { |event| weather_service_client.send_event(event) }
               .map { |response|
                 puts "#{Time.now}: #{response.status.code}"
                 response.status.code.to_s

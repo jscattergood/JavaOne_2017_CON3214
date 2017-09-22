@@ -4,6 +4,7 @@ java_import 'java.lang.Runnable'
 java_import 'java.util.concurrent.TimeUnit'
 java_import 'java.util.concurrent.ConcurrentHashMap'
 java_import 'java.time.Duration'
+java_import 'ratpack.http.client.HttpClient'
 java_import 'ratpack.stream.Streams'
 java_import 'ratpack.service.Service'
 java_import 'ratpack.exec.ExecController'
@@ -95,7 +96,7 @@ class EventCache
       .publish(events)
       .flat_map do |event|
         @alarm_service_client
-          .send_weather_event(event)
+          .send_event(event)
           .on_error do |err|
             @updates.put(event[:location], true)
             backpressure(true)

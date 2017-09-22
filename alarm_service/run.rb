@@ -2,6 +2,7 @@ require 'jbundler'
 require 'java'
 require 'jruby/core_ext'
 require 'json'
+require './common/metrics_reporter'
 
 java_import 'ratpack.server.RatpackServer'
 java_import 'ratpack.dropwizard.metrics.DropwizardMetricsModule'
@@ -15,10 +16,12 @@ RatpackServer.start do |server|
   end
 
   server.registry(
-    Guice::registry do |r|
-      r.module(DropwizardMetricsModule.new) do |m|
-        m.jmx
+    Guice::registry do |b|
+      b.module(DropwizardMetricsModule.new) do |m|
+        m.web_socket
       end
+
+      b.add(MetricsReporter.new)
     end
   )
 
@@ -32,7 +35,7 @@ RatpackServer.start do |server|
         .map { |b| JSON.parse(b.text) }
         .map { |event| puts event}
         .map { |event|
-          sleep(2)
+          sleep(1)
         }
         .then { ctx.render('OK') }
     end

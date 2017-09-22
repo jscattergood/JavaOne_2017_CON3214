@@ -1,12 +1,9 @@
 require 'jbundler'
 require 'java'
 require './common/metrics_reporter'
-require './weather_service/alarm_service_client'
-require './weather_service/event_buffer'
 
 java_import 'ratpack.server.RatpackServer'
 java_import 'ratpack.dropwizard.metrics.DropwizardMetricsModule'
-java_import 'ratpack.dropwizard.metrics.MetricsWebsocketBroadcastHandler'
 java_import 'ratpack.guice.Guice'
 
 RatpackServer.start do |server|
@@ -21,7 +18,6 @@ RatpackServer.start do |server|
       end
 
       b.add(MetricsReporter.new)
-      b.add(EventBuffer.new)
     end
   )
 
@@ -30,22 +26,12 @@ RatpackServer.start do |server|
       ctx.render('OK')
     end
 
-    chain.get("admin/metrics", MetricsWebsocketBroadcastHandler.new)
-
-    chain.post('weather') do |ctx|
-      buffer = ctx.get(EventBuffer.java_class)
-
+    chain.post('metrics') do |ctx|
+      ip = ctx.request.get_remote_address
       ctx.request.body
         .map { |b| JSON.parse(b.text) }
-        .flat_map { |event| buffer.add(event) }
-        .then { |buffered|
-          if buffered
-            ctx.render('OK')
-          else
-            puts "backpressure!!!"
-            ctx.response.status(429).send
-          end
-        }
+        .map { |event| puts "#{ip} #{event}"}
+        .then { ctx.render('OK') }
     end
   end
 end

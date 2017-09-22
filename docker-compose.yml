@@ -20,15 +20,14 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
-  weather:
+  metrics:
     image: weatheralarm
-    command: bundle exec jruby ./weather_service/cache_run.rb
+    command: bundle exec jruby ./metrics_service/run.rb
     volumes:
-          - .:/usr/src/app
+      - .:/usr/src/app
     environment:
-      - WA_ALARM_SERVICE_URL=http://alarm
-    ports:
-      - 5000:80
+      - WA_METRICS_SERVICE_URL=http://metrics
+      - WA_SERVICE_NAME=metrics
     networks:
       - weatheralarm
     labels: [orbiter=true]
@@ -36,6 +35,39 @@ services:
       mode: replicated
       replicas: 1
       labels: [orbiter=true]
+      update_config:
+        parallelism: 2
+        delay: 3s
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+        restart_policy:
+          condition: on-failure
+          delay: 3s
+          max_attempts: 3
+          window: 5s
+  weather:
+    image: weatheralarm
+    command: bundle exec jruby ./weather_service/cache_run.rb
+    volumes:
+      - .:/usr/src/app
+    environment:
+      - WA_ALARM_SERVICE_URL=http://alarm
+      - WA_METRICS_SERVICE_URL=http://metrics
+      - WA_SERVICE_NAME=weather
+    ports:
+      - 5000:80
+    networks:
+      - weatheralarm
+    labels: [orbiter=true,orbiter.cooldown=300]
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels: [orbiter=true,orbiter.cooldown=300]
       update_config:
         parallelism: 2
         delay: 3s
@@ -55,16 +87,18 @@ services:
     image: weatheralarm
     command: bundle exec jruby ./alarm_service/run.rb
     volumes:
-          - .:/usr/src/app
+      - .:/usr/src/app
     environment:
       - WA_NOTIFICATION_SERVICE_URL=http://notification
+      - WA_METRICS_SERVICE_URL=http://metrics
+      - WA_SERVICE_NAME=alarm
     networks:
       - weatheralarm
-    labels: [orbiter=true]
+    labels: [orbiter=true,orbiter.cooldown=300]
     deploy:
       mode: replicated
       replicas: 3
-      labels: [orbiter=true]
+      labels: [orbiter=true,orbiter.cooldown=300]
       update_config:
         parallelism: 2
         delay: 3s
@@ -84,14 +118,17 @@ services:
     image: weatheralarm
     command: bundle exec jruby ./notification_service/run.rb
     volumes:
-          - .:/usr/src/app
+      - .:/usr/src/app
+    environment:
+      - WA_METRICS_SERVICE_URL=http://metrics
+      - WA_SERVICE_NAME=notification
     networks:
       - weatheralarm
-    labels: [orbiter=true]
+    labels: [orbiter=true,orbiter.cooldown=300]
     deploy:
       mode: replicated
       replicas: 1
-      labels: [orbiter=true]
+      labels: [orbiter=true,orbiter.cooldown=300]
       update_config:
         parallelism: 2
         delay: 3s
