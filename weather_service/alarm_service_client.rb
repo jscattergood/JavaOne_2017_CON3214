@@ -1,7 +1,4 @@
-require 'java'
-require 'json'
-
-java_import 'java.time.Duration'
+require './common/common'
 
 class AlarmServiceClient
   def initialize(url, client)

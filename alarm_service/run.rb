@@ -18,7 +18,7 @@ RatpackServer.start do |server|
   server.registry(
     Guice::registry do |b|
       b.module(DropwizardMetricsModule.new) do |m|
-        m.web_socket
+        m.jmx
       end
 
       b.add(MetricsReporter.new)

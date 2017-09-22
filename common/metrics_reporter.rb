@@ -1,18 +1,5 @@
-require 'java/override'
+require './common/common'
 require './common/metrics_service_client'
-
-java_import 'com.codahale.metrics.MetricRegistry'
-java_import 'com.codahale.metrics.MetricFilter'
-java_import 'java.lang.Runnable'
-java_import 'java.nio.charset.Charset'
-java_import 'java.util.concurrent.TimeUnit'
-java_import 'io.netty.buffer.ByteBufAllocator'
-java_import 'ratpack.dropwizard.metrics.internal.MetricRegistryJsonMapper'
-java_import 'ratpack.exec.ExecController'
-java_import 'ratpack.exec.Execution'
-java_import 'ratpack.exec.Promise'
-java_import 'ratpack.http.client.HttpClient'
-java_import 'ratpack.service.Service'
 
 class MetricsReporter
   include Java::Override

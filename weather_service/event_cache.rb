@@ -1,15 +1,4 @@
-require 'java/override'
-
-java_import 'java.lang.Runnable'
-java_import 'java.util.concurrent.TimeUnit'
-java_import 'java.util.concurrent.ConcurrentHashMap'
-java_import 'java.time.Duration'
-java_import 'ratpack.http.client.HttpClient'
-java_import 'ratpack.stream.Streams'
-java_import 'ratpack.service.Service'
-java_import 'ratpack.exec.ExecController'
-java_import 'ratpack.exec.Execution'
-java_import 'ratpack.exec.Promise'
+require './common/common'
 
 class EventCache
   include Java::Override

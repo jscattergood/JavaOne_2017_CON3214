@@ -1,10 +1,5 @@
-require 'jbundler'
-require 'java'
+require './common/common'
 require './common/metrics_reporter'
-
-java_import 'ratpack.server.RatpackServer'
-java_import 'ratpack.dropwizard.metrics.DropwizardMetricsModule'
-java_import 'ratpack.guice.Guice'
 
 RatpackServer.start do |server|
   server.server_config do |cfg|
@@ -14,7 +9,7 @@ RatpackServer.start do |server|
   server.registry(
     Guice::registry do |b|
       b.module(DropwizardMetricsModule.new) do |m|
-        m.web_socket
+        m.jmx
       end
 
       b.add(MetricsReporter.new)

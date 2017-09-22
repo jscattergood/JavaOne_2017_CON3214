@@ -1,7 +1,5 @@
-require 'java'
+require './common/common'
 require 'json'
-
-java_import 'java.time.Duration'
 
 class MetricsServiceClient
   def initialize(url, client)

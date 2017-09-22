@@ -1,14 +1,6 @@
-require 'jbundler'
-require 'java'
-require 'json'
+require './common/common'
 require './weather_emitter/weather_service_client'
 require './weather_emitter/yahoo_weather_client'
-
-java_import 'ratpack.server.RatpackServer'
-java_import 'ratpack.stream.Streams'
-java_import 'ratpack.http.ResponseChunks'
-java_import 'ratpack.http.client.HttpClient'
-java_import 'ratpack.exec.Promise'
 
 RatpackServer.start do |server|
   server.server_config do |cfg|

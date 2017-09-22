@@ -1,4 +1,4 @@
-require 'java'
+require './common/common'
 
 class WeatherUndergroundClient
   def initialize(api_key, client)
