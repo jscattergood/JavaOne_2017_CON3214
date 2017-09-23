@@ -54,7 +54,7 @@ class EventCache
   def backpressure(backoff)
     if backoff
       @metric_registry.meter('service.backpressure.alarm').mark
-      @backoff_duration = [600, 1 + @backoff_duration * 2].min
+      @backoff_duration = [60, 1 + @backoff_duration * 2].min
       puts "increasing back off to #{@backoff_duration} secs"
     else
       @backoff_duration = [@backoff_duration / 2, 1].max

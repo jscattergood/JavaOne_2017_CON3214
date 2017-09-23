@@ -11,7 +11,9 @@ class AutoscalerServiceClient
 
   def scale_up(service)
     puts "scaling up #{service}..."
-    uri = to_uri("#{ @url }/v1/orbiter/handle/autoswarm/#{ENV['WA_STACK_NAME']}_#{service}/up")
+    url = "#{ @url }/v1/orbiter/handle/autoswarm/#{ENV['WA_STACK_NAME']}_#{service}/up"
+    puts url
+    uri = to_uri(url)
     @client.post(uri) do |req|
       req.connect_timeout(Duration.of_seconds(5))
       req.read_timeout(Duration.of_seconds(5))
@@ -20,7 +22,9 @@ class AutoscalerServiceClient
 
   def scale_down(service)
     puts "scaling down #{service}..."
-    uri = to_uri("#{ @url }/v1/orbiter/handle/autoswarm/#{ENV['WA_STACK_NAME']}_#{service}/down")
+    url = "#{ @url }/v1/orbiter/handle/autoswarm/#{ENV['WA_STACK_NAME']}_#{service}/down"
+    puts url
+    uri = to_uri(url)
     @client.post(uri) do |req|
       req.connect_timeout(Duration.of_seconds(5))
       req.read_timeout(Duration.of_seconds(5))

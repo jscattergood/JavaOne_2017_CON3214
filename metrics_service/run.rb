@@ -27,22 +27,53 @@ RatpackServer.start do |server|
       http = ctx.get(HttpClient.java_class)
       ctx.request.body
         .map { |b| JSON.parse(b.text) }
-        .flat_map { |event| handle_event(http, event, ip) }
+        .flat_map { |event| handle_event(http, ip, event) }
         .then { ctx.render('OK') }
     end
   end
 
-  def handle_event(http, event, ip)
+  def handle_event(http, ip, event)
     puts "#{ip} #{event}"
     client = AutoscalerServiceClient.new(ENV['WA_AUTOSCALER_SERVICE_URL'], http)
     meters = event.dig('metrics', 'meters')
-    bp = meters.select { |k,_| k.start_with? 'service.backpressure' }
+    check_backpressure(client, meters)
+  end
+
+  def check_backpressure(client, meters)
+    bp = meters.select { |k, _| k.start_with? 'service.backpressure' }
     Streams.publish(bp.to_a)
-    .filter { |entry| entry.last['m1_rate'] > 0.10 }
-    .flat_map do |entry|
-      service = entry.first.split('.').last
-      client.scale_up(service)
+      .flat_map do |entry|
+      adjust_scale(client, entry)
     end
-    .to_list
+      .to_list
+  end
+
+  def adjust_scale(client, entry)
+    Promise
+      .value(entry)
+      .next_op_if(
+        ->(e) { e.last['m1_rate'] < 0.01 && e.last['m5_rate'] < 0.01 },
+        lambda do |e|
+          service = e.first.split('.').last
+          Operation.of {
+            client.scale_down(service)
+              .then do |response|
+                puts response.body.text if response.status.code >= 400
+              end
+          }
+        end
+      )
+      .next_op_if(
+        ->(e) { e.last['m1_rate'] > 0.10 },
+        lambda do |e|
+          service = e.first.split('.').last
+          Operation.of {
+            client.scale_up(service)
+              .then do |response|
+                puts response.body.text if response.status.code >= 400
+              end
+          }
+        end
+      )
   end
 end

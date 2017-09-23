@@ -4,7 +4,7 @@ services:
     image: gianarb/orbiter
     command: daemon
     ports:
-      - 8081:8000
+      - 8000:8000
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
@@ -29,7 +29,7 @@ services:
       - .:/usr/src/app
     environment:
       - WA_METRICS_SERVICE_URL=http://metrics
-      - WA_AUTOSCALER_SERVICE_URL=http://orbiter:8081
+      - WA_AUTOSCALER_SERVICE_URL=http://orbiter:8000
       - WA_STACK_NAME=wa
       - WA_SERVICE_NAME=metrics
     networks:
