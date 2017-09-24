@@ -10,7 +10,7 @@ class MetricsReporter
     registry = start_event.registry
 
     http_client = registry.get(HttpClient.java_class)
-    @metrics_service_client = MetricsServiceClient.new(ENV['WA_METRICS_SERVICE_URL'], http_client)
+    @metrics_service_client = MetricsServiceClient.new(ENV['WA_MONITOR_SERVICE_URL'], http_client)
 
     @byte_buf_allocator = registry.get(ByteBufAllocator.java_class)
     @metric_registry = registry.get(MetricRegistry.java_class)

@@ -22,19 +22,18 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
-  metrics:
+  monitor:
     image: weatheralarm
-    command: bundle exec jruby ./metrics_service/run.rb
+    command: bundle exec jruby ./monitor_service/run.rb
     volumes:
       - .:/usr/src/app
     environment:
-      - WA_METRICS_SERVICE_URL=http://metrics
+      - WA_MONITOR_SERVICE_URL=http://monitor
       - WA_AUTOSCALER_SERVICE_URL=http://orbiter:8000
       - WA_STACK_NAME=wa
-      - WA_SERVICE_NAME=metrics
+      - WA_SERVICE_NAME=monitor
     networks:
       - weatheralarm
-    labels: [orbiter=true]
     deploy:
       mode: replicated
       replicas: 1
@@ -61,17 +60,16 @@ services:
       - .:/usr/src/app
     environment:
       - WA_ALARM_SERVICE_URL=http://alarm
-      - WA_METRICS_SERVICE_URL=http://metrics
+      - WA_MONITOR_SERVICE_URL=http://monitor
       - WA_SERVICE_NAME=weather
     ports:
       - 5000:80
     networks:
       - weatheralarm
-    labels: [orbiter=true,orbiter.cooldown=300]
     deploy:
       mode: replicated
       replicas: 1
-      labels: [orbiter=true,orbiter.cooldown=300]
+      labels: [orbiter=true,orbiter.cooldown=60]
       update_config:
         parallelism: 2
         delay: 3s
@@ -94,15 +92,14 @@ services:
       - .:/usr/src/app
     environment:
       - WA_NOTIFICATION_SERVICE_URL=http://notification
-      - WA_METRICS_SERVICE_URL=http://metrics
+      - WA_MONITOR_SERVICE_URL=http://monitor
       - WA_SERVICE_NAME=alarm
     networks:
       - weatheralarm
-    labels: [orbiter=true,orbiter.cooldown=300]
     deploy:
       mode: replicated
-      replicas: 3
-      labels: [orbiter=true,orbiter.cooldown=300]
+      replicas: 1
+      labels: [orbiter=true,orbiter.up=2,orbiter.cooldown=60]
       update_config:
         parallelism: 2
         delay: 3s
@@ -124,15 +121,14 @@ services:
     volumes:
       - .:/usr/src/app
     environment:
-      - WA_METRICS_SERVICE_URL=http://metrics
+      - WA_MONITOR_SERVICE_URL=http://monitor
       - WA_SERVICE_NAME=notification
     networks:
       - weatheralarm
-    labels: [orbiter=true,orbiter.cooldown=300]
     deploy:
       mode: replicated
       replicas: 1
-      labels: [orbiter=true,orbiter.cooldown=300]
+      labels: [orbiter=true,orbiter.cooldown=60]
       update_config:
         parallelism: 2
         delay: 3s
