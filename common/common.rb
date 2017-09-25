@@ -3,6 +3,7 @@ require 'java/override'
 
 java_import 'com.codahale.metrics.MetricRegistry'
 java_import 'com.codahale.metrics.MetricFilter'
+java_import 'com.codahale.metrics.graphite.Graphite'
 java_import 'io.netty.buffer.ByteBufAllocator'
 java_import 'java.lang.Runnable'
 java_import 'java.nio.charset.Charset'

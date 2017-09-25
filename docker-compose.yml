@@ -22,16 +22,17 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
-  monitor:
+  autoscaler:
     image: weatheralarm
-    command: bundle exec jruby ./monitor_service/run.rb
+    command: bundle exec jruby ./autoscaler_service/run.rb
     volumes:
       - .:/usr/src/app
     environment:
-      - WA_MONITOR_SERVICE_URL=http://monitor
-      - WA_AUTOSCALER_SERVICE_URL=http://orbiter:8000
+      - WA_AUTOSCALER_SERVICE_URL=http://autoscaler
+      - WA_ORBITER_SERVICE_URL=http://orbiter:8000
+      - WA_GRAPHITE_HOST=graphite
       - WA_STACK_NAME=wa
-      - WA_SERVICE_NAME=monitor
+      - WA_SERVICE_NAME=autoscaler
     networks:
       - weatheralarm
     deploy:
@@ -60,7 +61,8 @@ services:
       - .:/usr/src/app
     environment:
       - WA_ALARM_SERVICE_URL=http://alarm
-      - WA_MONITOR_SERVICE_URL=http://monitor
+      - WA_AUTOSCALER_SERVICE_URL=http://autoscaler
+      - WA_GRAPHITE_HOST=graphite
       - WA_SERVICE_NAME=weather
     ports:
       - 5000:80
@@ -69,7 +71,7 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-      labels: [orbiter=true,orbiter.cooldown=60]
+      labels: [orbiter=true,orbiter.cooldown=300]
       update_config:
         parallelism: 2
         delay: 3s
@@ -92,14 +94,15 @@ services:
       - .:/usr/src/app
     environment:
       - WA_NOTIFICATION_SERVICE_URL=http://notification
-      - WA_MONITOR_SERVICE_URL=http://monitor
+      - WA_AUTOSCALER_SERVICE_URL=http://autoscaler
+      - WA_GRAPHITE_HOST=graphite
       - WA_SERVICE_NAME=alarm
     networks:
       - weatheralarm
     deploy:
       mode: replicated
       replicas: 1
-      labels: [orbiter=true,orbiter.up=2,orbiter.cooldown=60]
+      labels: [orbiter=true,orbiter.up=2,orbiter.cooldown=300]
       update_config:
         parallelism: 2
         delay: 3s
@@ -121,14 +124,40 @@ services:
     volumes:
       - .:/usr/src/app
     environment:
-      - WA_MONITOR_SERVICE_URL=http://monitor
+      - WA_AUTOSCALER_SERVICE_URL=http://autoscaler
+      - WA_GRAPHITE_HOST=graphite
       - WA_SERVICE_NAME=notification
     networks:
       - weatheralarm
     deploy:
       mode: replicated
       replicas: 1
-      labels: [orbiter=true,orbiter.cooldown=60]
+      labels: [orbiter=true,orbiter.cooldown=300]
+      update_config:
+        parallelism: 2
+        delay: 3s
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+        restart_policy:
+          condition: on-failure
+          delay: 3s
+          max_attempts: 3
+          window: 5s
+  graphite:
+    image: hopsoft/graphite-statsd
+    ports:
+      - 9000:80
+      - 2003-2004:2003-2004
+      - 2023-2024:2023-2024
+    networks:
+      - weatheralarm
+    deploy:
+      mode: global
       update_config:
         parallelism: 2
         delay: 3s

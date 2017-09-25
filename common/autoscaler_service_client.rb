@@ -1,7 +1,7 @@
 require './common/common'
 require 'json'
 
-class MetricsServiceClient
+class AutoscalerServiceClient
   include Common
 
   def initialize(url, client)

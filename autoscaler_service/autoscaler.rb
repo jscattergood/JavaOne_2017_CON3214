@@ -1,13 +1,14 @@
 require './common/common'
-require './monitor_service/orbiter_service_client'
+require './autoscaler_service/orbiter_service_client'
 
 class AutoScaler
   include Java::Override
   include Service
+
   def on_start(start_event)
     registry = start_event.registry
     http_client = registry.get(HttpClient.java_class)
-    @orbiter_client = OrbiterServiceClient.new(ENV['WA_AUTOSCALER_SERVICE_URL'], http_client)
+    @orbiter_client = OrbiterServiceClient.new(ENV['WA_ORBITER_SERVICE_URL'], http_client)
   end
 
   def handle_event(ip, event)
@@ -17,7 +18,7 @@ class AutoScaler
   end
 
   def check_backpressure(meters)
-    bp = meters.select { |k, _| k.start_with? 'service.backpressure' }
+    bp = meters.select { |k, _| k.start_with? 'backpressure.service' }
     Streams.publish(bp.to_a)
       .flat_map do |entry|
       adjust_scale(entry)
@@ -41,7 +42,7 @@ class AutoScaler
         end
       )
       .next_op_if(
-        ->(e) { e.last['m1_rate'] > 0.10 },
+        ->(e) { e.last['m1_rate'] > 1 },
         lambda do |e|
           service = e.first.split('.').last
           Operation.of {

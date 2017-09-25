@@ -1,5 +1,5 @@
 require './common/common'
-require './common/metrics_service_client'
+require './common/autoscaler_service_client'
 
 class MetricsReporter
   include Java::Override
@@ -10,7 +10,7 @@ class MetricsReporter
     registry = start_event.registry
 
     http_client = registry.get(HttpClient.java_class)
-    @metrics_service_client = MetricsServiceClient.new(ENV['WA_MONITOR_SERVICE_URL'], http_client)
+    @autoscaler_client = AutoscalerServiceClient.new(ENV['WA_AUTOSCALER_SERVICE_URL'], http_client)
 
     @byte_buf_allocator = registry.get(ByteBufAllocator.java_class)
     @metric_registry = registry.get(MetricRegistry.java_class)
@@ -32,7 +32,7 @@ class MetricsReporter
   end
 
   def send_event(metric)
-    @metrics_service_client
+    @autoscaler_client
       .send_event(metric)
       .on_error { |err| STDERR.puts "{metric: #{metric}, error: #{err}}" }
   end
