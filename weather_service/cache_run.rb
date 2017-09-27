@@ -35,14 +35,14 @@ RatpackServer.start do |server|
       ctx.request.body
         .map { |b| JSON.parse(b.text) }
         .flat_map { |event| cache.add(event) }
-        .then { |buffered|
-          if buffered
+        .then do |cached|
+          if cached
             ctx.render('OK')
           else
             puts "backpressure!!!"
             ctx.response.status(429).send
           end
-        }
+        end
     end
   end
 end
