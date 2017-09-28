@@ -29,8 +29,6 @@ RatpackServer.start do |server|
       ctx.render('OK')
     end
 
-    chain.get("admin/metrics", MetricsWebsocketBroadcastHandler.new)
-
     chain.post('stock') do |ctx|
       buffer = ctx.get(EventBuffer.java_class)
 

@@ -27,8 +27,6 @@ RatpackServer.start do |server|
       ctx.render('OK')
     end
 
-    chain.get("admin/metrics", MetricsWebsocketBroadcastHandler.new)
-
     chain.post('stock') do |ctx|
       http_client = ctx.get(HttpClient.java_class)
       alert_service_client = AlertServiceClient.new(ENV['SA_ALERT_SERVICE_URL'], http_client)
