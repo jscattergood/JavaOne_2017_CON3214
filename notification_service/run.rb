@@ -3,7 +3,7 @@ require './common/metrics_reporter'
 
 RatpackServer.start do |server|
   server.server_config do |cfg|
-    cfg.env('WA_')
+    cfg.env('SA_')
   end
 
   server.registry(

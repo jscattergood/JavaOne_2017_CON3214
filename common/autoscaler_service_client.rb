@@ -16,7 +16,7 @@ class AutoscalerServiceClient
       req.read_timeout(Duration.of_seconds(5))
       req.body { |b| b.text(
         {
-          service: ENV['WA_SERVICE_NAME'],
+          service: ENV['SA_SERVICE_NAME'],
           metrics: event
         }.to_json
       )}

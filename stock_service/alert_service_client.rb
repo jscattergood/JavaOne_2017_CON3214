@@ -1,6 +1,6 @@
 require './common/common'
 
-class AlarmServiceClient
+class AlertServiceClient
   include Common
 
   def initialize(url, client)
@@ -9,7 +9,7 @@ class AlarmServiceClient
   end
 
   def send_event(event)
-    uri = to_uri("#{ @url }/weather")
+    uri = to_uri("#{ @url }/stock")
     @client.post(uri) do |req|
       req.connect_timeout(Duration.of_seconds(5))
       req.read_timeout(Duration.of_seconds(5))

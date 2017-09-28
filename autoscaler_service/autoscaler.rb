@@ -8,7 +8,7 @@ class AutoScaler
   def on_start(start_event)
     registry = start_event.registry
     http_client = registry.get(HttpClient.java_class)
-    @orbiter_client = OrbiterServiceClient.new(ENV['WA_ORBITER_SERVICE_URL'], http_client)
+    @orbiter_client = OrbiterServiceClient.new(ENV['SA_ORBITER_SERVICE_URL'], http_client)
   end
 
   def handle_event(ip, event)

@@ -10,4 +10,4 @@ ADD Jarfile /usr/src/app/
 ADD Jarfile.lock /usr/src/app/
 RUN jbundle install --system
 
-ENV WA_SERVER__PORT=80
+ENV SA_SERVER__PORT=80

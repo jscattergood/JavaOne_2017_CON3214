@@ -1,6 +1,7 @@
 require './common/common'
 require './common/metrics_reporter'
-require './autoscaler_service/autoscaler'
+require './stock_service/alert_service_client'
+require './stock_service/event_cache'
 
 RatpackServer.start do |server|
   server.server_config do |cfg|
@@ -19,7 +20,7 @@ RatpackServer.start do |server|
       end
 
       b.add(MetricsReporter.new)
-      b.add(AutoScaler.new)
+      b.add(EventCache.new)
     end
   )
 
@@ -28,14 +29,20 @@ RatpackServer.start do |server|
       ctx.render('OK')
     end
 
-    chain.post('metrics') do |ctx|
-      scaler = ctx.get(AutoScaler.java_class)
+    chain.post('stock') do |ctx|
+      cache = ctx.get(EventCache.java_class)
 
-      ip = ctx.request.get_remote_address
       ctx.request.body
         .map { |b| JSON.parse(b.text) }
-        .flat_map { |event| scaler.handle_event(ip, event) }
-        .then { ctx.render('OK') }
+        .flat_map { |event| cache.add(event) }
+        .then do |cached|
+          if cached
+            ctx.render('OK')
+          else
+            puts "backpressure!!!"
+            ctx.response.status(429).send
+          end
+        end
     end
   end
 end

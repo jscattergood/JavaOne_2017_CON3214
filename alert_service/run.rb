@@ -11,7 +11,7 @@ java_import 'java.nio.file.FileSystems'
 
 RatpackServer.start do |server|
   server.server_config do |cfg|
-    cfg.env('WA_')
+    cfg.env('SA_')
     cfg.base_dir(FileSystems.default.get_path(File.absolute_path('.')))
   end
 
@@ -21,8 +21,8 @@ RatpackServer.start do |server|
         m.jmx
         m.graphite do |g|
           g.reporter_interval(Duration.of_seconds(10))
-          g.prefix("service.#{ENV['WA_SERVICE_NAME']}")
-          g.sender(Graphite.new(ENV['WA_GRAPHITE_HOST'], 2003))
+          g.prefix("service.#{ENV['SA_SERVICE_NAME']}")
+          g.sender(Graphite.new(ENV['SA_GRAPHITE_HOST'], 2003))
         end
       end
 
@@ -35,7 +35,7 @@ RatpackServer.start do |server|
       f.dir('public').index_files('index.html')
     end
 
-    chain.post('weather') do |ctx|
+    chain.post('stock') do |ctx|
       ctx.request.body
         .map { |b| JSON.parse(b.text) }
         .map { |event| puts event}
@@ -43,7 +43,7 @@ RatpackServer.start do |server|
         .then { ctx.render('OK') }
     end
 
-    chain.post('alarm') do |ctx|
+    chain.post('alert') do |ctx|
       ctx.response.status(501).send('Unimplemented')
     end
   end

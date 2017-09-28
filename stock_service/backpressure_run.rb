@@ -1,11 +1,10 @@
 require './common/common'
 require './common/metrics_reporter'
-require './weather_service/alarm_service_client'
-require './weather_service/event_buffer'
+require './stock_service/alert_service_client'
 
 RatpackServer.start do |server|
   server.server_config do |cfg|
-    cfg.env('WA_')
+    cfg.env('SA_')
   end
 
   server.registry(
@@ -14,13 +13,12 @@ RatpackServer.start do |server|
         m.jmx
         m.graphite do |g|
           g.reporter_interval(Duration.of_seconds(10))
-          g.prefix("service.#{ENV['WA_SERVICE_NAME']}")
-          g.sender(Graphite.new(ENV['WA_GRAPHITE_HOST'], 2003))
+          g.prefix("service.#{ENV['SA_SERVICE_NAME']}")
+          g.sender(Graphite.new(ENV['SA_GRAPHITE_HOST'], 2003))
         end
       end
 
       b.add(MetricsReporter.new)
-      b.add(EventBuffer.new)
     end
   )
 
@@ -31,20 +29,14 @@ RatpackServer.start do |server|
 
     chain.get("admin/metrics", MetricsWebsocketBroadcastHandler.new)
 
-    chain.post('weather') do |ctx|
-      buffer = ctx.get(EventBuffer.java_class)
+    chain.post('stock') do |ctx|
+      http_client = ctx.get(HttpClient.java_class)
+      alert_service_client = AlertServiceClient.new(ENV['SA_ALERT_SERVICE_URL'], http_client)
 
       ctx.request.body
         .map { |b| JSON.parse(b.text) }
-        .flat_map { |event| buffer.add(event) }
-        .then do |buffered|
-          if buffered
-            ctx.render('OK')
-          else
-            puts "backpressure!!!"
-            ctx.response.status(429).send
-          end
-        end
+        .flat_map { |event| alert_service_client.send_event(event) }
+        .then { ctx.render('OK') }
     end
   end
 end

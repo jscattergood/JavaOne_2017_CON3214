@@ -1,20 +1,24 @@
 require 'net/http'
 require 'json'
 
-# This is a basic script that sends random weather events to the weather service as fast as possible
+# This is a basic script that sends random stock events to the stock service as fast as possible
 
 threads = []
 5.times do
   threads << Thread.start do
-    uri = URI.parse("#{ENV['WA_WEATHER_SERVICE_URL']}/weather")
+    uri = URI.parse("#{ENV['SA_STOCK_SERVICE_URL']}/stock")
     http = Net::HTTP.new(uri.host, uri.port)
     backoff = 1
     done = false
     until done
+      ticker = []
+      5.times do
+        ticker << ('A'.ord + Random.rand(0..25)).chr
+      end
       request = Net::HTTP::Post.new(uri.path, { 'Content-Type' => 'application/json' })
       request.body = {
-        location: "#{Random.rand(10000..99999)}",
-        temperature: "#{Random.rand(0..100)}"
+        ticker: "#{ticker.join('')}",
+        price: "#{Random.rand(1..1000)}"
       }.to_json
 
       response = http.request(request)

@@ -8,7 +8,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      - weatheralarm
+      - stockalert
     deploy:
       placement:
         constraints:
@@ -23,18 +23,18 @@ services:
           cpus: '0.25'
           memory: 256M
   autoscaler:
-    image: weatheralarm
+    image: stockalert
     command: bundle exec jruby ./autoscaler_service/run.rb
     volumes:
       - .:/usr/src/app
     environment:
-      - WA_AUTOSCALER_SERVICE_URL=http://autoscaler
-      - WA_ORBITER_SERVICE_URL=http://orbiter:8000
-      - WA_GRAPHITE_HOST=graphite
-      - WA_STACK_NAME=wa
-      - WA_SERVICE_NAME=autoscaler
+      - SA_AUTOSCALER_SERVICE_URL=http://autoscaler
+      - SA_ORBITER_SERVICE_URL=http://orbiter:8000
+      - SA_GRAPHITE_HOST=graphite
+      - SA_STACK_NAME=wa
+      - SA_SERVICE_NAME=autoscaler
     networks:
-      - weatheralarm
+      - stockalert
     deploy:
       mode: replicated
       replicas: 1
@@ -54,20 +54,20 @@ services:
           delay: 3s
           max_attempts: 3
           window: 5s
-  weather:
-    image: weatheralarm
-    command: bundle exec jruby ./weather_service/cache_run.rb
+  stock:
+    image: stockalert
+    command: bundle exec jruby ./stock_service/cache_run.rb
     volumes:
       - .:/usr/src/app
     environment:
-      - WA_ALARM_SERVICE_URL=http://alarm
-      - WA_AUTOSCALER_SERVICE_URL=http://autoscaler
-      - WA_GRAPHITE_HOST=graphite
-      - WA_SERVICE_NAME=weather
+      - SA_ALERT_SERVICE_URL=http://alert
+      - SA_AUTOSCALER_SERVICE_URL=http://autoscaler
+      - SA_GRAPHITE_HOST=graphite
+      - SA_SERVICE_NAME=stock
     ports:
       - 5000:80
     networks:
-      - weatheralarm
+      - stockalert
     deploy:
       mode: replicated
       replicas: 1
@@ -87,18 +87,18 @@ services:
           delay: 3s
           max_attempts: 3
           window: 5s
-  alarm:
-    image: weatheralarm
-    command: bundle exec jruby ./alarm_service/run.rb
+  alert:
+    image: stockalert
+    command: bundle exec jruby ./alert_service/run.rb
     volumes:
       - .:/usr/src/app
     environment:
-      - WA_NOTIFICATION_SERVICE_URL=http://notification
-      - WA_AUTOSCALER_SERVICE_URL=http://autoscaler
-      - WA_GRAPHITE_HOST=graphite
-      - WA_SERVICE_NAME=alarm
+      - SA_NOTIFICATION_SERVICE_URL=http://notification
+      - SA_AUTOSCALER_SERVICE_URL=http://autoscaler
+      - SA_GRAPHITE_HOST=graphite
+      - SA_SERVICE_NAME=alert
     networks:
-      - weatheralarm
+      - stockalert
     deploy:
       mode: replicated
       replicas: 1
@@ -119,16 +119,16 @@ services:
           max_attempts: 3
           window: 5s
   notification:
-    image: weatheralarm
+    image: stockalert
     command: bundle exec jruby ./notification_service/run.rb
     volumes:
       - .:/usr/src/app
     environment:
-      - WA_AUTOSCALER_SERVICE_URL=http://autoscaler
-      - WA_GRAPHITE_HOST=graphite
-      - WA_SERVICE_NAME=notification
+      - SA_AUTOSCALER_SERVICE_URL=http://autoscaler
+      - SA_GRAPHITE_HOST=graphite
+      - SA_SERVICE_NAME=notification
     networks:
-      - weatheralarm
+      - stockalert
     deploy:
       mode: replicated
       replicas: 1
@@ -155,7 +155,7 @@ services:
       - 2003-2004:2003-2004
       - 2023-2024:2023-2024
     networks:
-      - weatheralarm
+      - stockalert
     deploy:
       mode: global
       update_config:
@@ -174,4 +174,4 @@ services:
           max_attempts: 3
           window: 5s
 networks:
-  weatheralarm:
+  stockalert:

@@ -13,8 +13,8 @@ class EventCache
 
   def add(event)
     Promise.async do |d|
-      @cache.put(event['location'], event['temperature'])
-      @updates.put(event['location'], true)
+      @cache.put(event['ticker'], event['price'])
+      @updates.put(event['ticker'], true)
       d.success(true)
     end
   end
@@ -22,7 +22,7 @@ class EventCache
   def on_start(start_event)
     registry = start_event.registry
     http_client = registry.get(HttpClient.java_class)
-    @alarm_service_client = AlarmServiceClient.new(ENV['WA_ALARM_SERVICE_URL'], http_client)
+    @alert_service_client = AlertServiceClient.new(ENV['SA_ALERT_SERVICE_URL'], http_client)
     @metric_registry = registry.get(MetricRegistry.java_class)
 
     exec = registry.get(ExecController.java_class)
@@ -53,7 +53,7 @@ class EventCache
 
   def backpressure(backoff)
     if backoff
-      @metric_registry.meter('backpressure.service.alarm').mark
+      @metric_registry.meter('backpressure.service.alert').mark
       @backoff_duration = [30, 1 + @backoff_duration * 2].min
       puts "increasing back off to #{@backoff_duration} secs"
     else
@@ -86,10 +86,10 @@ class EventCache
     Streams
       .publish(events)
       .flat_map do |event|
-        @alarm_service_client
+        @alert_service_client
           .send_event(event)
           .on_error do |err|
-            @updates.put(event[:location], true)
+            @updates.put(event[:ticker], true)
             backpressure(true)
             STDERR.puts "{event: #{event}, error: #{err}}"
           end
@@ -99,7 +99,7 @@ class EventCache
 
   def hydrate_events(keys)
     keys.map do |key|
-      { location: key, temperature: @cache[key] }
+      { ticker: key, price: @cache[key] }
     end
   end
 end
