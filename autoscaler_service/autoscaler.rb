@@ -24,15 +24,16 @@ class AutoScaler
       .to_list
   end
 
-  def adjust_scale(service, metric)
+  def adjust_scale(metric_name, metric_value)
+    service = metric_name.split('.').last
     Promise
-      .value(metric)
+      .value(metric_value)
       .next_op_if(
-        ->(m) { m['m1_rate'] < 0.01 && m['m5_rate'] < 0.01 },
+        ->(v) { v['m1_rate'] < 0.01 && v['m5_rate'] < 0.01 },
         ->(_) { scale_down(service) }
       )
       .next_op_if(
-        ->(m) { m['m1_rate'] > 1 },
+        ->(v) { v['m1_rate'] > 1 },
         ->(_) { scale_up(service) }
       )
   end
