@@ -6,7 +6,7 @@ class EventCache
   include Runnable
 
   def initialize
-    @cache = ConcurrentHashMap.new(100000)
+    @cache = ConcurrentHashMap.new(100_000)
     @updates = ConcurrentHashMap.new
     @backoff_duration = 0
   end

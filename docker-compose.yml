@@ -31,7 +31,7 @@ services:
       - SA_AUTOSCALER_SERVICE_URL=http://autoscaler
       - SA_ORBITER_SERVICE_URL=http://orbiter:8000
       - SA_GRAPHITE_HOST=graphite
-      - SA_STACK_NAME=wa
+      - SA_STACK_NAME=sa
       - SA_SERVICE_NAME=autoscaler
     networks:
       - stockalert

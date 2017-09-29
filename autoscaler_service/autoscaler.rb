@@ -20,44 +20,34 @@ class AutoScaler
   def check_backpressure(meters)
     bp = meters.select { |k, _| k.start_with? 'backpressure.service' }
     Streams.publish(bp.to_a)
-      .flat_map { |meter| adjust_scale(meter.last) }
+      .flat_map { |array| adjust_scale(array.first, array.last) }
       .to_list
   end
 
-  def adjust_scale(metric)
+  def adjust_scale(service, metric)
     Promise
       .value(metric)
       .next_op_if(
         ->(m) { m['m1_rate'] < 0.01 && m['m5_rate'] < 0.01 },
-        scale_down
+        ->(_) { scale_down(service) }
       )
       .next_op_if(
         ->(m) { m['m1_rate'] > 1 },
-        scale_up
+        ->(_) { scale_up(service) }
       )
   end
 
-  def scale_up
-    lambda do |e|
-      service = e.first.split('.').last
-      Operation.of {
-        @orbiter_client.scale_up(service)
-          .then do |response|
-          puts response.body.text if response.status.code >= 400
-        end
-      }
-    end
+  def scale_up(service)
+    Operation.of {
+      @orbiter_client.scale_up(service)
+        .then { |response| puts response.body.text if response.status.code >= 400 }
+    }
   end
 
-  def scale_down
-    lambda do |e|
-      service = e.first.split('.').last
-      Operation.of {
-        @orbiter_client.scale_down(service)
-          .then do |response|
-          puts response.body.text if response.status.code >= 400
-        end
-      }
-    end
+  def scale_down(service)
+    Operation.of {
+      @orbiter_client.scale_down(service)
+        .then { |response| puts response.body.text if response.status.code >= 400 }
+    }
   end
 end
