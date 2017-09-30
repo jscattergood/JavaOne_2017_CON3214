@@ -71,7 +71,6 @@ RatpackServer.start do |server|
           false
         end
       end
-      puts matches
       notifications = matches.map do |a|
         {
           ticker: event['ticker'],
@@ -79,7 +78,6 @@ RatpackServer.start do |server|
           phone: a.phone
         }
       end
-      puts notifications
       d.success(notifications)
     end
   end
