@@ -92,7 +92,7 @@ class StockHandler
     @notification_service_client
       .send_notification(notification)
       .on_error do |err|
-        reset_trigger(notification[:id])
+        reset_trigger(notification[:id]).then {}
         backpressure(true)
         STDERR.puts "{event: #{notification}, error: #{err}}"
       end
@@ -120,8 +120,11 @@ class StockHandler
   end
 
   def reset_trigger(id)
-    puts "resetting trigger for #{id}"
-    alert = Alert.find(id)
-    alert.update(last_triggered: nil)
+    Promise.async do |d|
+      puts "resetting trigger for id=#{id}"
+      alert = Alert.find(id)
+      alert.update(last_triggered: nil)
+      d.success(true)
+    end
   end
 end
