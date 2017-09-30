@@ -1,7 +1,7 @@
 require './common/common'
 require './common/metrics_reporter'
-require './stock_service/alert_service_client'
-require './stock_service/event_cache'
+require_relative 'alert_service_client'
+require_relative 'event_cache'
 
 RatpackServer.start do |server|
   server.server_config do |cfg|
@@ -9,7 +9,7 @@ RatpackServer.start do |server|
   end
 
   server.registry(
-    Guice::registry do |b|
+    Guice.registry do |b|
       b.module(DropwizardMetricsModule.new) do |m|
         m.jmx
         m.graphite do |g|

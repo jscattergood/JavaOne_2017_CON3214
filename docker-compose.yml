@@ -1,59 +1,5 @@
 version: '3.3'
 services:
-  orbiter:
-    image: gianarb/orbiter
-    command: daemon
-    ports:
-      - 8000:8000
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - stockalert
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      mode: replicated
-      replicas: 1
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
-  autoscaler:
-    image: stockalert
-    command: bundle exec jruby ./autoscaler_service/run.rb
-    volumes:
-      - .:/usr/src/app
-    environment:
-      - SA_AUTOSCALER_SERVICE_URL=http://autoscaler
-      - SA_ORBITER_SERVICE_URL=http://orbiter:8000
-      - SA_GRAPHITE_HOST=graphite
-      - SA_STACK_NAME=sa
-      - SA_SERVICE_NAME=autoscaler
-    networks:
-      - stockalert
-    deploy:
-      mode: replicated
-      replicas: 1
-      labels: [orbiter=true]
-      update_config:
-        parallelism: 2
-        delay: 3s
-      resources:
-        limits:
-          cpus: '0.25'
-          memory: 256M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
-        restart_policy:
-          condition: on-failure
-          delay: 3s
-          max_attempts: 3
-          window: 5s
   stock:
     image: stockalert
     command: bundle exec jruby ./stock_service/cache_run.rb
@@ -148,6 +94,69 @@ services:
           delay: 3s
           max_attempts: 3
           window: 5s
+  autoscaler:
+    image: stockalert
+    command: bundle exec jruby ./autoscaler_service/run.rb
+    volumes:
+      - .:/usr/src/app
+    environment:
+      - SA_AUTOSCALER_SERVICE_URL=http://autoscaler
+      - SA_ORBITER_SERVICE_URL=http://orbiter:8000
+      - SA_GRAPHITE_HOST=graphite
+      - SA_STACK_NAME=sa
+      - SA_SERVICE_NAME=autoscaler
+    networks:
+      - stockalert
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels: [orbiter=true]
+      update_config:
+        parallelism: 2
+        delay: 3s
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+        restart_policy:
+          condition: on-failure
+          delay: 3s
+          max_attempts: 3
+          window: 5s
+  # Support services
+  orbiter:
+    image: gianarb/orbiter
+    command: daemon
+    ports:
+      - 8000:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - stockalert
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+  alertdb:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=alerts
+      - POSTGRES_PASSWORD=alerts
+    networks:
+      - stockalert
   graphite:
     image: hopsoft/graphite-statsd
     ports:

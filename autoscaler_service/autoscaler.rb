@@ -1,5 +1,5 @@
 require './common/common'
-require './autoscaler_service/orbiter_service_client'
+require_relative 'orbiter_service_client'
 
 class AutoScaler
   include Java::Override

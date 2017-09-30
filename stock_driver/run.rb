@@ -18,7 +18,7 @@ threads = []
       request = Net::HTTP::Post.new(uri.path, { 'Content-Type' => 'application/json' })
       request.body = {
         ticker: "#{ticker.join('')}",
-        price: "#{Random.rand(1..1000)}"
+        price: "#{Random.rand(1..100)}"
       }.to_json
 
       response = http.request(request)

@@ -1,13 +1,10 @@
-require 'jbundler'
-require 'java'
-require 'jruby/core_ext'
-require 'json'
+require 'active_record'
+require 'activerecord-jdbc-adapter'
+require './common/common'
 require './common/metrics_reporter'
-
-java_import 'ratpack.server.RatpackServer'
-java_import 'ratpack.dropwizard.metrics.DropwizardMetricsModule'
-java_import 'ratpack.guice.Guice'
-java_import 'java.nio.file.FileSystems'
+require_relative 'db/startup'
+require_relative 'model/alert'
+require_relative 'notification_service_client'
 
 RatpackServer.start do |server|
   server.server_config do |cfg|
@@ -16,7 +13,7 @@ RatpackServer.start do |server|
   end
 
   server.registry(
-    Guice::registry do |b|
+    Guice.registry do |b|
       b.module(DropwizardMetricsModule.new) do |m|
         m.jmx
         m.graphite do |g|
@@ -36,15 +33,60 @@ RatpackServer.start do |server|
     end
 
     chain.post('stock') do |ctx|
+      http_client = ctx.get(HttpClient.java_class)
+      notification_service_client = NotificationServiceClient.new(
+        ENV['SA_NOTIFICATION_SERVICE_URL'],
+        http_client
+      )
+
       ctx.request.body
         .map { |b| JSON.parse(b.text) }
-        .map { |event| puts event}
-        .map { |event| sleep(1) }
+        .map { |event| puts event; event}
+        .flat_map { |event| find_matches(event) }
+        .flat_map { |alerts| send_messages(notification_service_client, alerts) }
         .then { ctx.render('OK') }
     end
 
     chain.post('alert') do |ctx|
       ctx.response.status(501).send('Unimplemented')
     end
+
+    chain.patch('alert') do |ctx|
+      ctx.response.status(501).send('Unimplemented')
+    end
+  end
+
+  def find_matches(event)
+    Promise.async do |d|
+      results = Alert.where(ticker: event['ticker'])
+      matches = results.select do |a|
+        case a.predicate
+        when 'GT'
+          event['price'].to_f > a.value
+        when 'LT'
+          event['price'].to_f < a.value
+        when 'EQ'
+          event['price'].to_f == a.value
+        else
+          false
+        end
+      end
+      puts matches
+      notifications = matches.map do |a|
+        {
+          ticker: event['ticker'],
+          price: event['price'],
+          phone: a.phone
+        }
+      end
+      puts notifications
+      d.success(notifications)
+    end
+  end
+
+  def send_messages(client, alerts)
+    Streams.publish(alerts)
+      .flat_map { |a| client.send_notification(a)}
+      .to_list
   end
 end

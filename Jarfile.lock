@@ -34,6 +34,7 @@
 - io.netty:netty-handler:jar:4.1.9.Final
 - io.dropwizard.metrics:metrics-graphite:jar:3.1.1
 - io.dropwizard.metrics:metrics-jvm:jar:3.1.1
+- org.postgresql:postgresql:jar:42.1.4.jre7
 - io.netty:netty-codec-http:jar:4.1.9.Final
 - io.netty:netty-buffer:jar:4.1.9.Final
 - com.fasterxml.jackson.datatype:jackson-datatype-guava:jar:2.8.7

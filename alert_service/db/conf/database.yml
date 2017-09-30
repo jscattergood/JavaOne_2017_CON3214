@@ -1,0 +1,4 @@
+adapter: postgresql
+url: jdbc:postgresql://localhost:5432/alerts
+username: alerts
+password: alerts
