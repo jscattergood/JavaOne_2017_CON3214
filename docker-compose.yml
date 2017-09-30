@@ -155,7 +155,7 @@ services:
   alertsdb:
     image: postgres
     ports:
-      -5432:5432
+      - 5432:5432
     environment:
       - POSTGRES_USER=alerts
       - POSTGRES_PASSWORD=alerts

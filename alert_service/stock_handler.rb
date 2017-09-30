@@ -60,7 +60,7 @@ class StockHandler
     event_stream = Streams.publish(events)
     Streams.stream_map(event_stream) do |subscription, out|
       out.item_map(subscription) do |event|
-        results = Alert.where('ticker = ? and last_triggered is null or last_triggered < ?',
+        results = Alert.where('ticker = ? and (last_triggered is null or last_triggered < ?)',
                               event['ticker'], Time.now - 1.minute)
         matches = results.select do |a|
           case a.predicate
