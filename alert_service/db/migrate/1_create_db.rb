@@ -7,8 +7,8 @@ class CreateDb < ActiveRecord::Migration
       t.column :ticker, :string, null: false
       t.column :value, :float, null: false
       t.column :predicate, :string, null: false
-      t.column :email, :string
       t.column :phone, :string
+      t.column :last_triggered, :timestamp
       t.column :last_notified, :timestamp
     end
 
@@ -24,7 +24,6 @@ class CreateDb < ActiveRecord::Migration
       a.ticker = 'AAAAA'
       a.value = 50
       a.predicate = 'LT'
-      a.email = 'john.doe@example.com'
       a.phone = '+15555555555'
     end
   end

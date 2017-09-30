@@ -5,7 +5,8 @@ ActiveRecord::Schema.define do
     t.column :ticker, :string, null: false
     t.column :value, :float, null: false
     t.column :predicate, :string, null: false
-    t.column :email, :string
     t.column :phone, :string
+    t.column :last_triggered, :timestamp
+    t.column :last_notified, :timestamp
   end
 end

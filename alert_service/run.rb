@@ -3,8 +3,7 @@ require 'activerecord-jdbc-adapter'
 require './common/common'
 require './common/metrics_reporter'
 require_relative 'db/startup'
-require_relative 'model/alert'
-require_relative 'notification_service_client'
+require_relative 'stock_handler'
 
 RatpackServer.start do |server|
   server.server_config do |cfg|
@@ -24,6 +23,7 @@ RatpackServer.start do |server|
       end
 
       b.add(MetricsReporter.new)
+      b.add(StockHandler.new)
     end
   )
 
@@ -33,17 +33,12 @@ RatpackServer.start do |server|
     end
 
     chain.post('stock') do |ctx|
-      http_client = ctx.get(HttpClient.java_class)
-      notification_service_client = NotificationServiceClient.new(
-        ENV['SA_NOTIFICATION_SERVICE_URL'],
-        http_client
-      )
+      handler = ctx.get(StockHandler.java_class)
 
       ctx.request.body
         .map { |b| JSON.parse(b.text) }
         .map { |event| puts event; event}
-        .flat_map { |event| find_matches(event) }
-        .flat_map { |alerts| send_messages(notification_service_client, alerts) }
+        .flat_map { |event| handler.handle(event) }
         .then { ctx.render('OK') }
     end
 
@@ -54,37 +49,5 @@ RatpackServer.start do |server|
     chain.patch('alert') do |ctx|
       ctx.response.status(501).send('Unimplemented')
     end
-  end
-
-  def find_matches(event)
-    Promise.async do |d|
-      results = Alert.where(ticker: event['ticker'])
-      matches = results.select do |a|
-        case a.predicate
-        when 'GT'
-          event['price'].to_f > a.value
-        when 'LT'
-          event['price'].to_f < a.value
-        when 'EQ'
-          event['price'].to_f == a.value
-        else
-          false
-        end
-      end
-      notifications = matches.map do |a|
-        {
-          ticker: event['ticker'],
-          price: event['price'],
-          phone: a.phone
-        }
-      end
-      d.success(notifications)
-    end
-  end
-
-  def send_messages(client, alerts)
-    Streams.publish(alerts)
-      .flat_map { |a| client.send_notification(a)}
-      .to_list
   end
 end
