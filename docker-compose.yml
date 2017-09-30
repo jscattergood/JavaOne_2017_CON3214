@@ -73,6 +73,9 @@ services:
       - SA_AUTOSCALER_SERVICE_URL=http://autoscaler
       - SA_GRAPHITE_HOST=graphite
       - SA_SERVICE_NAME=notification
+      - SA_TWILIO_SID=sid
+      - SA_TWILIO_AUTH=auth
+      - SA_TWILIO_NUMBER=+15555555555
     networks:
       - stockalert
     deploy:
@@ -149,9 +152,10 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
-  alertdb:
+  alertsdb:
     image: postgres
-    restart: always
+    ports:
+      -5432:5432
     environment:
       - POSTGRES_USER=alerts
       - POSTGRES_PASSWORD=alerts

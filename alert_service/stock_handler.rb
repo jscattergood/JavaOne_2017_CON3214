@@ -40,7 +40,9 @@ class StockHandler
           next if events.blank?
           find_matches(events)
             .flat_map { |notification| send_message(notification) }
-            .to_promise.then { |response| handle_response(response) }
+            .to_promise
+            .on_error { |err| STDERR.puts "{error: #{err}}" }
+            .then { |response| handle_response(response) }
         end
     end
   end
