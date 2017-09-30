@@ -75,9 +75,9 @@ class StockHandler
 
         matches.each do |alert|
           alert.update(last_triggered: Time.now)
-
           out.item(
             {
+              id: alert.id,
               ticker: event['ticker'],
               price: event['price'],
               phone: alert.phone
@@ -92,6 +92,7 @@ class StockHandler
     @notification_service_client
       .send_notification(notification)
       .on_error do |err|
+        reset_trigger(notification[:id])
         backpressure(true)
         STDERR.puts "{event: #{notification}, error: #{err}}"
       end
@@ -116,5 +117,11 @@ class StockHandler
         @backoff_duration = 0
       end
     end
+  end
+
+  def reset_trigger(id)
+    puts "resetting trigger for #{id}"
+    alert = Alert.find(id)
+    alert.update(last_triggered: nil)
   end
 end
