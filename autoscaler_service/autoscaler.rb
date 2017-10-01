@@ -12,7 +12,7 @@ class AutoScaler
   end
 
   def handle_event(ip, event)
-    puts "#{ip} #{event}"
+    Common::Log.debug "#{ip} #{event}"
     meters = event.dig('metrics', 'meters')
     check_backpressure(meters)
   end
@@ -41,14 +41,14 @@ class AutoScaler
   def scale_up(service)
     Operation.of {
       @orbiter_client.scale_up(service)
-        .then { |response| puts response.body.text if response.status.code >= 400 }
+        .then { |response| Common::Log.info response.body.text if response.status.code >= 400 }
     }
   end
 
   def scale_down(service)
     Operation.of {
       @orbiter_client.scale_down(service)
-        .then { |response| puts response.body.text if response.status.code >= 400 }
+        .then { |response| Common::Log.info response.body.text if response.status.code >= 400 }
     }
   end
 end

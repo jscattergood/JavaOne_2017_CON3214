@@ -34,6 +34,6 @@ class MetricsReporter
   def send_event(metric)
     @autoscaler_client
       .send_event(metric)
-      .on_error { |err| STDERR.puts "{metric: #{metric}, error: #{err}}" }
+      .on_error { |err| Common::Log.error "{metric: #{metric}, error: #{err}}" }
   end
 end

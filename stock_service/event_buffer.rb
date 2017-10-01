@@ -39,7 +39,7 @@ class EventBuffer
   end
 
   def handle_response(response)
-    puts "#{Time.now}: #{response.status.code}"
+    Common::Log.debug "#{response.status.code}"
     backpressure(response.status.code == 429 || response.status.code >= 500)
   end
 
@@ -47,11 +47,11 @@ class EventBuffer
     if backoff
       @metric_registry.meter('backpressure.service.alert').mark
       @backoff_duration = [30, 1 + @backoff_duration * 2].min
-      puts "increasing back off to #{@backoff_duration} secs"
+      Common::Log.info "increasing back off to #{@backoff_duration} secs"
     else
       @backoff_duration = [@backoff_duration / 2, 1].max
       if @backoff_duration > 1
-        puts "decreasing back off to #{@backoff_duration} secs"
+        Common::Log.info "decreasing back off to #{@backoff_duration} secs"
       else
         @backoff_duration = 0
       end
@@ -77,7 +77,7 @@ class EventBuffer
           .on_error do |err|
             @buffer.offer(event, 1, TimeUnit::SECONDS)
             backpressure(true)
-            STDERR.puts "{event: #{event}, error: #{err}}"
+            Common::Log.error "{event: #{event}, error: #{err}}"
           end
       end
       .to_list

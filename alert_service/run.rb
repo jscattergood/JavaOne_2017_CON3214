@@ -41,7 +41,7 @@ RatpackServer.start do |server|
 
       ctx.request.body
         .map { |b| JSON.parse(b.text) }
-        .map { |event| puts event; event}
+        .map { |event| event}
         .flat_map { |event| handler.handle(event) }
         .then { ctx.render('OK') }
     end
@@ -51,7 +51,9 @@ RatpackServer.start do |server|
     end
 
     chain.patch('alert') do |ctx|
-      ctx.response.status(501).send('Unimplemented')
+      ctx.request.body
+        .map { |b| JSON.parse(b.text) }
+
     end
   end
 end

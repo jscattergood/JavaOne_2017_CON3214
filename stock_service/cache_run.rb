@@ -39,7 +39,7 @@ RatpackServer.start do |server|
           if cached
             ctx.render('OK')
           else
-            puts "backpressure!!!"
+            Common::Log.debug 'backpressure!!!'
             ctx.response.status(429).send
           end
         end

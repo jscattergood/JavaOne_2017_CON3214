@@ -28,6 +28,7 @@ class StockHandler
 
   def handle(event)
     Promise.async do |d|
+      Common::Log.debug event
       d.success(@buffer.offer(event, 1, TimeUnit::SECONDS))
     end
   end
@@ -41,7 +42,7 @@ class StockHandler
           find_matches(events)
             .flat_map { |notification| send_message(notification) }
             .to_promise
-            .on_error { |err| STDERR.puts "{error: #{err}}" }
+            .on_error { |err| Common::Log.error "{error: #{err}}" }
             .then { |response| handle_response(response) }
         end
     end
@@ -51,7 +52,7 @@ class StockHandler
     Promise
       .async { |downstream|
         events = []
-        @buffer.drain_to(events, 10)
+        @buffer.drain_to(events, 1000)
         downstream.success(events)
       }
   end
@@ -96,13 +97,13 @@ class StockHandler
       .on_error do |err|
         reset_trigger(notification[:id]).then {}
         backpressure(true)
-        STDERR.puts "{event: #{notification}, error: #{err}}"
+        Common::Log.error "{event: #{notification}, error: #{err}}"
       end
   end
 
   def handle_response(response)
     return if response.nil?
-    puts "#{Time.now}: #{response.status.code}"
+    Common::Log.debug "#{response.status.code}"
     backpressure(response.status.code == 429 || response.status.code >= 500)
   end
 
@@ -110,11 +111,11 @@ class StockHandler
     if backoff
       @metric_registry.meter('backpressure.service.notification').mark
       @backoff_duration = [30, 1 + @backoff_duration * 2].min
-      puts "increasing back off to #{@backoff_duration} secs"
+      Common::Log.info "increasing back off to #{@backoff_duration} secs"
     else
       @backoff_duration = [@backoff_duration / 2, 1].max
       if @backoff_duration > 1
-        puts "decreasing back off to #{@backoff_duration} secs"
+        Common::Log.info "decreasing back off to #{@backoff_duration} secs"
       else
         @backoff_duration = 0
       end
@@ -123,7 +124,7 @@ class StockHandler
 
   def reset_trigger(id)
     Promise.async do |d|
-      puts "resetting trigger for id=#{id}"
+      Common::Log.debug "resetting trigger for id=#{id}"
       alert = Alert.find(id)
       alert.update(last_triggered: nil)
       d.success(true)

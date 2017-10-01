@@ -10,7 +10,7 @@ class OrbiterServiceClient
   end
 
   def scale_up(service)
-    puts "scaling up #{service}..."
+    Common::Log.info "scaling up #{service}..."
     uri = to_uri("#{ @url }/v1/orbiter/handle/autoswarm/#{ENV['SA_STACK_NAME']}_#{service}/up")
     @client.post(uri) do |req|
       req.connect_timeout(Duration.of_seconds(5))
@@ -19,7 +19,7 @@ class OrbiterServiceClient
   end
 
   def scale_down(service)
-    puts "scaling down #{service}..."
+    Common::Log.info "scaling down #{service}..."
     uri = to_uri("#{ @url }/v1/orbiter/handle/autoswarm/#{ENV['SA_STACK_NAME']}_#{service}/down")
     @client.post(uri) do |req|
       req.connect_timeout(Duration.of_seconds(5))

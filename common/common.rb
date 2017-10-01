@@ -1,5 +1,6 @@
 require 'jbundler'
 require 'java/override'
+require 'logger'
 
 java_import 'com.codahale.metrics.MetricRegistry'
 java_import 'com.codahale.metrics.MetricFilter'
@@ -28,5 +29,33 @@ java_import 'ratpack.stream.Streams'
 module Common
   def to_uri(url)
     java.net.URI.new(url)
+  end
+
+  class Log
+    def self.debug(message)
+      @logger ||= create_logger
+      @logger.debug(message)
+    end
+
+    def self.info(message)
+      @logger ||= create_logger
+      @logger.info(message)
+    end
+
+    def self.warn(message)
+      @logger ||= create_logger
+      @logger.warn(message)
+    end
+
+    def self.error(message)
+      @logger ||= create_logger
+      @logger.error(message)
+    end
+
+    def self.create_logger
+      logger = Logger.new(STDOUT)
+      logger.level = Logger::DEBUG
+      logger
+    end
   end
 end
