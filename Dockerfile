@@ -11,3 +11,6 @@ ADD Jarfile.lock /usr/src/app/
 RUN jbundle install --system
 
 ENV SA_SERVER__PORT=80
+
+HEALTHCHECK --interval=1m --timeout=3s \
+  CMD curl -f http://localhost/ || exit 1

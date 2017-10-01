@@ -32,6 +32,10 @@ RatpackServer.start do |server|
       f.dir('public').index_files('index.html')
     end
 
+    chain.get do |ctx|
+      ctx.redirect('/index.html')
+    end
+
     chain.post('stock') do |ctx|
       handler = ctx.get(StockHandler.java_class)
 
