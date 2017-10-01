@@ -35,7 +35,7 @@ class StockHandler
 
   def run
     Execution.fork.start do |_|
-      get_events
+      pending_stock_updates
         .defer(Duration.of_seconds(@backoff_duration))
         .then do |events|
           next if events.blank?
@@ -48,7 +48,7 @@ class StockHandler
     end
   end
 
-  def get_events
+  def pending_stock_updates
     Promise
       .async { |downstream|
         events = []

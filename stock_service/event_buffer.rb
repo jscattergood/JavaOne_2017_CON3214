@@ -28,7 +28,7 @@ class EventBuffer
 
   def run
     Execution.fork.start do |_|
-      get_events
+      pending_events
         .map { |events| reduce_events(events) }
         .flat_map { |events| send_events(events) }
         .defer(Duration.of_seconds(@backoff_duration))
@@ -58,7 +58,7 @@ class EventBuffer
     end
   end
 
-  def get_events
+  def pending_events
     #TODO Make this a custom publisher
     Promise
       .async { |downstream|

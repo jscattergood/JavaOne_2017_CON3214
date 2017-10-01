@@ -1,6 +1,6 @@
 require './common/common'
 require './common/metrics_reporter'
-require_relative 'twilio_service_client'
+require_relative 'notification_handler'
 
 RatpackServer.start do |server|
   server.server_config do |cfg|
@@ -19,6 +19,7 @@ RatpackServer.start do |server|
       end
 
       b.add(MetricsReporter.new)
+      b.add(NotificationHandler.new)
     end
   )
 
@@ -28,13 +29,19 @@ RatpackServer.start do |server|
     end
 
     chain.post('notification') do |ctx|
-      http_client = ctx.get(HttpClient.java_class)
+      handler = ctx.get(NotificationHandler.java_class)
 
-      client = TwilioServiceClient.new(http_client)
       ctx.request.body
         .map { |b| JSON.parse(b.text) }
-        .flat_map { |n| client.send_notification(n) }
-        .then { |response| ctx.render(response.body.text) }
+        .flat_map { |event| handler.handle(event) }
+        .then do |buffered|
+          if buffered
+            ctx.render('OK')
+          else
+            Common::Log.debug 'backpressure!!!'
+            ctx.response.status(429).send
+          end
+        end
     end
   end
 end
