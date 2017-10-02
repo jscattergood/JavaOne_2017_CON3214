@@ -12,5 +12,5 @@ RUN jbundle install --system
 
 ENV SA_SERVER__PORT=80
 
-HEALTHCHECK --interval=1m --timeout=3s \
+HEALTHCHECK --interval=1m --timeout=10s \
   CMD curl -f http://localhost/ || exit 1

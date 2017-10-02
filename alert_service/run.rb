@@ -3,6 +3,7 @@ require 'activerecord-jdbc-adapter'
 require './common/common'
 require './common/metrics_reporter'
 require_relative 'db/startup'
+require_relative 'model/rule'
 require_relative 'stock_handler'
 
 RatpackServer.start do |server|
@@ -46,14 +47,12 @@ RatpackServer.start do |server|
         .then { ctx.render('OK') }
     end
 
-    chain.post('alert') do |ctx|
-      ctx.response.status(501).send('Unimplemented')
-    end
-
-    chain.patch('alert') do |ctx|
+    chain.patch('rule/:id') do |ctx|
+      id = ctx.path_tokens['id']
       ctx.request.body
         .map { |b| JSON.parse(b.text) }
-
+        .flat_map { |fields| Promise.async { |d| d.success(Rule.update(id, fields)) } }
+        .then { ctx.render('OK') }
     end
   end
 end

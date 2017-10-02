@@ -1,5 +1,5 @@
 adapter: postgresql
-url: jdbc:postgresql://alertsdb:5432/alerts
-username: alerts
-password: alerts
+url: jdbc:postgresql://alertdb:5432/alert
+username: alert
+password: alert
 pool: 25

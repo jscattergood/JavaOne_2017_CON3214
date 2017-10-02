@@ -1,5 +1,5 @@
 require './common/common'
-require_relative 'model/alert'
+require_relative 'model/rule'
 require_relative 'notification_service_client'
 
 class StockHandler
@@ -40,7 +40,7 @@ class StockHandler
         .then do |events|
           next if events.blank?
           find_matches(events)
-            .flat_map { |notification| send_message(notification) }
+            .flat_map { |notification| send_alert(notification) }
             .to_promise
             .on_error { |err| Common::Log.error "{error: #{err}}" }
             .then { |response| handle_response(response) }
@@ -61,29 +61,29 @@ class StockHandler
     event_stream = Streams.publish(events)
     Streams.stream_map(event_stream) do |subscription, out|
       out.item_map(subscription) do |event|
-        results = Alert.where('ticker = ? and (last_triggered is null or last_triggered < ?)',
-                              event['ticker'], Time.now - 1.minute)
-        matches = results.select do |a|
-          case a.predicate
+        results = Rule.where('ticker = ? and (last_triggered is null or last_triggered < ?)',
+                             event['ticker'], Time.now - 1.minute)
+        matches = results.select do |rule|
+          case rule.predicate
           when 'GT'
-            event['price'].to_f > a.value
+            event['price'].to_f > rule.value
           when 'LT'
-            event['price'].to_f < a.value
+            event['price'].to_f < rule.value
           when 'EQ'
-            event['price'].to_f == a.value
+            event['price'].to_f == rule.value
           else
             false
           end
         end
 
-        matches.each do |alert|
-          alert.update(last_triggered: Time.now)
+        matches.each do |rule|
+          rule.update(last_triggered: Time.now)
           out.item(
             {
-              id: alert.id,
+              id: rule.id,
               ticker: event['ticker'],
               price: event['price'],
-              phone: alert.phone
+              phone: rule.phone
             }
           )
         end
@@ -91,7 +91,7 @@ class StockHandler
     end
   end
 
-  def send_message(notification)
+  def send_alert(notification)
     @notification_service_client
       .send_notification(notification)
       .on_error do |err|
@@ -125,8 +125,8 @@ class StockHandler
   def reset_trigger(id)
     Promise.async do |d|
       Common::Log.debug "resetting trigger for id=#{id}"
-      alert = Alert.find(id)
-      alert.update(last_triggered: nil)
+      rule = Rule.find(id)
+      rule.update(last_triggered: nil)
       d.success(true)
     end
   end

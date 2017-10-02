@@ -1,9 +1,9 @@
 require 'active_record'
-require_relative '../../model/alert'
+require_relative '../../model/rule'
 
 class CreateDb < ActiveRecord::Migration
   def up
-    create_table :alerts do |t|
+    create_table :rule do |t|
       t.column :ticker, :string, null: false
       t.column :value, :float, null: false
       t.column :predicate, :string, null: false
@@ -16,15 +16,15 @@ class CreateDb < ActiveRecord::Migration
   end
 
   def down
-    drop_table :alerts
+    drop_table :rule
   end
 
   def initialize_data
-    Alert.create do |a|
-      a.ticker = 'AAAAA'
-      a.value = 50
-      a.predicate = 'LT'
-      a.phone = '+15555555555'
+    Rule.create do |r|
+      r.ticker = 'AAAAA'
+      r.value = 50
+      r.predicate = 'LT'
+      r.phone = '+15555555555'
     end
   end
 end

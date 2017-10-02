@@ -24,10 +24,10 @@ services:
       resources:
         limits:
           cpus: '0.25'
-          memory: 512M
+          memory: 1024M
         reservations:
           cpus: '0.25'
-          memory: 256M
+          memory: 512M
         restart_policy:
           condition: on-failure
           delay: 3s
@@ -70,6 +70,7 @@ services:
     volumes:
       - .:/usr/src/app
     environment:
+      - SA_ALERT_SERVICE_URL=http://alert
       - SA_AUTOSCALER_SERVICE_URL=http://autoscaler
       - SA_GRAPHITE_HOST=graphite
       - SA_SERVICE_NAME=notification
@@ -152,13 +153,13 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
-  alertsdb:
+  alertdb:
     image: postgres
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_USER=alerts
-      - POSTGRES_PASSWORD=alerts
+      - POSTGRES_USER=alert
+      - POSTGRES_PASSWORD=alert
     networks:
       - stockalert
   graphite:

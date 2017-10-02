@@ -12,8 +12,8 @@ class TwilioServiceClient
     uri = to_uri("#{ @url }/Accounts/#{ENV['SA_TWILIO_SID']}/Messages")
     @client.post(uri) do |req|
       req.basic_auth(ENV['SA_TWILIO_SID'], ENV['SA_TWILIO_AUTH'])
-      req.connect_timeout(Duration.of_seconds(5))
-      req.read_timeout(Duration.of_seconds(5))
+      req.connect_timeout(Duration.of_seconds(10))
+      req.read_timeout(Duration.of_seconds(10))
       req.body do |b|
         b.type('application/x-www-form-urlencoded')
         b.text(

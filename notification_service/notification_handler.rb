@@ -64,7 +64,7 @@ class NotificationHandler
 
   def handle_response(event, response)
     if response.status.code < 500
-      send_success(event['id']).then {}
+      send_success(event['id'])
     else
       Promise.value(response)
     end
