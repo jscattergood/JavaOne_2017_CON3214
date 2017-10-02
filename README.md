@@ -5,6 +5,9 @@ This is application demonstrates how to build reactive micro-services using JRub
 ## Purpose ##
 Monitor stock prices and send alerts when prices meet specified criteria.
 
+## Presentation ##
+[SlideShare](https://www.slideshare.net/jpscattergood/reactive-microservices-with-jruby-and-docker)
+
 ## Disclaimer ##
 This is an example system! The purpose is to teach and therefore keeping all the code within the 
 same context is beneficial. In practice, it is an anti-pattern to build multiple services from the 
