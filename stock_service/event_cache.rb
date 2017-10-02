@@ -73,7 +73,7 @@ class EventCache
         keys = []
         count = 0
         @updates.each_key do |key|
-          break if count >= 10
+          break if count >= 100
           count += 1
           keys << key
           @updates.remove(key)
