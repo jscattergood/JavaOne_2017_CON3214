@@ -3,7 +3,7 @@ require_relative '../../model/rule'
 
 class CreateDb < ActiveRecord::Migration
   def up
-    create_table :rule do |t|
+    create_table :rules do |t|
       t.column :ticker, :string, null: false
       t.column :value, :float, null: false
       t.column :predicate, :string, null: false
