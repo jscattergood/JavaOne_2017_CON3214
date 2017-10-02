@@ -5,6 +5,11 @@ This is application demonstrates how to build reactive micro-services using JRub
 ## Purpose ##
 Monitor stock prices and send alerts when prices meet specified criteria.
 
+## Disclaimer ##
+This is an example system! The purpose is to teach and therefore keeping all the code within the 
+same context is beneficial. In practice, it is an anti-pattern to build multiple services from the 
+same repo and docker image.
+
 ## Quick start ##
 ### Docker compose ###
 1. `docker build . -t stockalert`
