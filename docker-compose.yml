@@ -2,7 +2,7 @@ version: '3.4'
 services:
   stock:
     image: stockalert
-    command: bundle exec jruby ./stock_service/cache_run.rb
+    command: jruby -G ./stock_service/cache_run.rb
     volumes:
       - .:/usr/src/app
     environment:
@@ -31,7 +31,7 @@ services:
           memory: 512M
   alert:
     image: stockalert
-    command: bundle exec jruby ./alert_service/run.rb
+    command: jruby -G ./alert_service/run.rb
     volumes:
       - .:/usr/src/app
     environment:
@@ -43,11 +43,11 @@ services:
       - stockalert
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 1
       labels: [orbiter=true,orbiter.up=2,orbiter.cooldown=300]
       update_config:
         parallelism: 2
-        delay: 3s
+        delay: 0s
         order: start-first
       resources:
         limits:
@@ -58,7 +58,7 @@ services:
           memory: 256M
   notification:
     image: stockalert
-    command: bundle exec jruby ./notification_service/run.rb
+    command: jruby -G ./notification_service/run.rb
     volumes:
       - .:/usr/src/app
     environment:
@@ -88,7 +88,7 @@ services:
           memory: 256M
   autoscaler:
     image: stockalert
-    command: bundle exec jruby ./autoscaler_service/run.rb
+    command: jruby -G ./autoscaler_service/run.rb
     volumes:
       - .:/usr/src/app
     environment:
