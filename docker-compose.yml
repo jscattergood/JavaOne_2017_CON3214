@@ -1,4 +1,4 @@
-version: '3.3'
+version: '3.4'
 services:
   stock:
     image: stockalert
@@ -21,6 +21,7 @@ services:
       update_config:
         parallelism: 2
         delay: 3s
+        order: start-first
       resources:
         limits:
           cpus: '0.25'
@@ -28,11 +29,6 @@ services:
         reservations:
           cpus: '0.25'
           memory: 512M
-        restart_policy:
-          condition: on-failure
-          delay: 3s
-          max_attempts: 3
-          window: 5s
   alert:
     image: stockalert
     command: bundle exec jruby ./alert_service/run.rb
@@ -47,11 +43,12 @@ services:
       - stockalert
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 3
       labels: [orbiter=true,orbiter.up=2,orbiter.cooldown=300]
       update_config:
         parallelism: 2
         delay: 3s
+        order: start-first
       resources:
         limits:
           cpus: '0.25'
@@ -59,11 +56,6 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
-        restart_policy:
-          condition: on-failure
-          delay: 3s
-          max_attempts: 3
-          window: 5s
   notification:
     image: stockalert
     command: bundle exec jruby ./notification_service/run.rb
@@ -86,6 +78,7 @@ services:
       update_config:
         parallelism: 2
         delay: 3s
+        order: start-first
       resources:
         limits:
           cpus: '0.25'
@@ -93,11 +86,6 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
-        restart_policy:
-          condition: on-failure
-          delay: 3s
-          max_attempts: 3
-          window: 5s
   autoscaler:
     image: stockalert
     command: bundle exec jruby ./autoscaler_service/run.rb
@@ -115,9 +103,6 @@ services:
       mode: replicated
       replicas: 1
       labels: [orbiter=true]
-      update_config:
-        parallelism: 2
-        delay: 3s
       resources:
         limits:
           cpus: '0.25'
@@ -125,11 +110,6 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
-        restart_policy:
-          condition: on-failure
-          delay: 3s
-          max_attempts: 3
-          window: 5s
   # Support services
   orbiter:
     image: gianarb/orbiter
@@ -172,9 +152,6 @@ services:
       - stockalert
     deploy:
       mode: global
-      update_config:
-        parallelism: 2
-        delay: 3s
       resources:
         limits:
           cpus: '0.25'
@@ -182,10 +159,5 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
-        restart_policy:
-          condition: on-failure
-          delay: 3s
-          max_attempts: 3
-          window: 5s
 networks:
   stockalert:
