@@ -1,4 +1,4 @@
-FROM jruby:9.1.13
+FROM jruby:9.2.0
 
 WORKDIR /usr/src/app
 
