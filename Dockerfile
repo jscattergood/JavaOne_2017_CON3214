@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 ADD Gemfile /usr/src/app/
 ADD Gemfile.lock /usr/src/app/
-RUN bundle install --system
+RUN bundle install --system --without test
 
 ADD Jarfile /usr/src/app/
 ADD Jarfile.lock /usr/src/app/
