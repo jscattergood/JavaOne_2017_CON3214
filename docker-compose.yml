@@ -3,8 +3,6 @@ services:
   stock:
     image: stockalert
     command: jruby -G ./stock_service/cache_run.rb
-    volumes:
-      - .:/usr/src/app
     environment:
       - SA_ALERT_SERVICE_URL=http://alert
       - SA_AUTOSCALER_SERVICE_URL=http://autoscaler
@@ -32,8 +30,6 @@ services:
   alert:
     image: stockalert
     command: jruby -G ./alert_service/run.rb
-    volumes:
-      - .:/usr/src/app
     environment:
       - SA_NOTIFICATION_SERVICE_URL=http://notification
       - SA_AUTOSCALER_SERVICE_URL=http://autoscaler
@@ -59,8 +55,6 @@ services:
   notification:
     image: stockalert
     command: jruby -G ./notification_service/run.rb
-    volumes:
-      - .:/usr/src/app
     environment:
       - SA_ALERT_SERVICE_URL=http://alert
       - SA_AUTOSCALER_SERVICE_URL=http://autoscaler
@@ -89,8 +83,6 @@ services:
   autoscaler:
     image: stockalert
     command: jruby -G ./autoscaler_service/run.rb
-    volumes:
-      - .:/usr/src/app
     environment:
       - SA_AUTOSCALER_SERVICE_URL=http://autoscaler
       - SA_ORBITER_SERVICE_URL=http://orbiter:8000

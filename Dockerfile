@@ -1,4 +1,4 @@
-FROM jruby:9.2.0
+FROM jruby:9.2.0.0
 
 WORKDIR /usr/src/app
 
@@ -9,6 +9,8 @@ RUN bundle install --system --without test
 ADD Jarfile /usr/src/app/
 ADD Jarfile.lock /usr/src/app/
 RUN jbundle install --system
+
+ADD . /usr/src/app
 
 ENV SA_SERVER__PORT=80
 
